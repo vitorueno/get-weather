@@ -1,4 +1,5 @@
 import random
+import os
 from uuid import uuid4
 import tzlocal
 import pytz
@@ -7,6 +8,7 @@ from pyowm.exceptions.api_response_error import NotFoundError
 from app import app, db,login_manager,api_clima
 from flask import render_template, redirect,request, flash
 from flask_login import current_user, login_user, login_required, logout_user
+from werkzeug import secure_filename
 from app.models import UsuarioModel, CidadeModel, AvaliacaoSiteModel
 from app.forms import (CadastroUsuarioForm,LoginUsuarioForm,CadastroCidadeForm,
     EdicaoCidadeForm, AvaliacaoSiteForm)
@@ -22,6 +24,9 @@ def carregar_index():
 def cadastrar_usuario():
     form_cad_user = CadastroUsuarioForm()
     if form_cad_user.validate_on_submit():
+        nome_arquivo = secure_filename(form_cad_user.imagem.data.filename)
+        form_cad_user.imagem.data.save(os.path.join(app.config['UPLOAD_FOLDER'],nome_arquivo))
+
         #padronizar formato do cpf(sem ponto e traço)
         form_cad_user.cpf.data = padronizar_cpf(form_cad_user.cpf.data)
 
@@ -37,7 +42,8 @@ def cadastrar_usuario():
                 if not usuario_ja_cadastrado: #verifica se o nome de usuário ja foi usado
                     if not email_ja_cadastrado:
                         novo_usuario = UsuarioModel(form_cad_user.cpf.data,form_cad_user.nome_completo.data,
-                            form_cad_user.nome_usuario.data,form_cad_user.email.data,form_cad_user.senha.data)
+                            form_cad_user.nome_usuario.data,form_cad_user.email.data,form_cad_user.senha.data,
+                            "img/"+nome_arquivo)
                         db.session.add(novo_usuario)
                         db.session.commit()
                         return redirect('/home')

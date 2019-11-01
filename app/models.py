@@ -5,19 +5,21 @@ from flask_login import UserMixin
 
 
 class UsuarioModel(db.Model,UserMixin):
-    cpf_usuario = db.Column(db.String(20),primary_key = True,nullable=False)
+    cpf_usuario = db.Column(db.String(14),primary_key = True,nullable=False)
     nome_completo =  db.Column(db.String,nullable=False)
     nome_usuario = db.Column(db.String(20), nullable=False, unique= True)
+    caminho_foto = db.Column(db.String, nullable=True)
     email = db.Column(db.String(256),nullable=False, unique=True)
     senha_hash = db.Column(db.String(256))
     lista_cidades = db.relationship('CidadeModel', back_populates='usuario') 
 
-    def __init__(self,cpf,nome_completo,nome_usuario,email,senha):
+    def __init__(self,cpf,nome_completo,nome_usuario,email,senha,caminho_foto):
         self.cpf_usuario = cpf
         self.nome_completo = nome_completo
         self.nome_usuario = nome_usuario
         self.email = email
         self.set_senha_hash(senha)
+        self.caminho_foto = caminho_foto
 
 
     def get_id(self):
