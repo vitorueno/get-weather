@@ -1,0 +1,16 @@
+{%from "form_helpers.html" import render_field %} 
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>avaliacao teste</title>
+</head>
+    <form action="/avaliacao_form" method="post">
+    {{form.csrf_token}}
+    {{render_field(form.nota)}}
+    {{render_field(form.comentario)}}
+    {{form.avaliar(class="btn btn-primary btn-lg")}}
+    </form>
+</body>
+</html>

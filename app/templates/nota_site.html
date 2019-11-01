@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Nota site test</title>
+</head>
+<body>
+    <h1>Avaliação do site</h1>
+    <h3>{{media}}</h3>
+
+    {%for avaliacao in avaliacoes%}
+        {% if  avaliacao.comentario|e  %}
+            <hr>
+            <h3>{{avaliacao.cpf_usuario}}</h3>
+            <p>{{avaliacao.comentario}}</p> 
+            <hr>
+        {%endif%}
+    {%endfor%}
+</body>
+</html>

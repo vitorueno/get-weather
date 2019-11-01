@@ -1,0 +1,19 @@
+{%from "form_helpers.html" import render_field %} 
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>test cadastro cidade</title>
+</head>
+<body>
+    <form action="cadastrar_cidade" method="POST">
+        {{form.csrf_token}}
+        {{ render_field(form.nome_cidade) }}
+        {{ render_field(form.descricao_cidade) }}
+        {{ render_field(form.favorita) }}
+        {{ render_field(form.notificacao) }}
+        {{ form.enviar }}
+    </form>
+</body>
+</html>

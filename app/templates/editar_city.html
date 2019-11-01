@@ -1,0 +1,19 @@
+{%from "form_helpers.html" import render_field %} 
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>test editar cidade</title>
+</head>
+<body>
+    <h1>{{cidade.nome_cidade}}</h1>
+    <form action="/editar_cidade/{{ cidade.id }}" method="POST">
+        {{form.csrf_token}}
+        {{ render_field(form.descricao_cidade) }}
+        {{ render_field(form.favorita) }}
+        {{ render_field(form.notificacao) }}
+        {{ form.editar }}
+    </form>
+</body>
+</html>
