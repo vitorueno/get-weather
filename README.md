@@ -1,10 +1,35 @@
-# flask-template
-Simple Flask template, feel free to use it if you want to
+<h1>Get Weather</h1>
 
-I created this template because I wanted to help my friends from school, so feel free to use it as you'd like.
+<h2>Sobre: </h2>
 
-created by:
-Vítor Augusto Ueno Otto
+<p>Get Weather é um site de listagem de previsões do tempo de cidades cadastradas pelo usuário, criado com Python, Flask e PYOWM principalmente. 
+O projeto foi criado em um trabalho em conjunto das disciplinas de Programação I e Engenharia de Software I, que tinha como objetivo promover o 
+planejamento e execução de um site CRUD (Create, Read, Update, Delete).</p>
+
+<h2>Criadores: </h2>
+
+<ul>
+    <li>Vítor Augusto Ueno Otto</li>
+    <li>Beatriz Bauer</li>
+    <li>Pedro Schumann</li>
+    <li>Gabriel Gahio Luiz</li>
+    <li>Teodoro Freiberger</li>
+    <li>Diógenes Honório Maçaneiro</li>
+</ul>
+
+<h2>Requisistos: </h2>
+
+<ul>
+    <li>Python versão 3.6 ou superior</li>
+    <li>flask</li>
+    <li>flask_sqlalchemy</li>
+    <li>flask_wtf</li>
+    <li>flask_bootstrap4</li>
+    <li>pyowm</li>
+    <li>uuid</li>
+    <li>tzlocal</li>
+    <li>pytz</li>
+</ul>
 
 my twitter:
 [@UenoOtto](https://twitter.com/UenoOtto)
