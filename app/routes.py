@@ -11,7 +11,7 @@ from flask_login import current_user, login_user, login_required, logout_user
 from werkzeug import secure_filename
 from app.models import UsuarioModel, CidadeModel, AvaliacaoSiteModel
 from app.forms import (CadastroUsuarioForm,LoginUsuarioForm,CadastroCidadeForm,
-    EdicaoCidadeForm, AvaliacaoSiteForm)
+    EdicaoCidadeForm, AvaliacaoSiteForm,EdicaoUsuarioForm)
 
 
 
@@ -62,6 +62,39 @@ def cadastrar_usuario():
             
     return render_template('cadastro_user.html',form=form_cad_user)
 
+@app.route('/editar_usuario',methods=['get','post'])
+@login_required
+def editar_usuario():
+    form_edit_user = EdicaoUsuarioForm()
+
+    #simplificando nomes
+    usuario = form_edit_user.nome_usuario
+    nome = form_edit_user.nome_completo
+    email = form_edit_user.email
+    imagem = form_edit_user.imagem
+
+    email.render_kw = {"value":current_user.email}
+    nome.render_kw = {"value":current_user.nome_completo}
+    usuario.render_kw = {"value":current_user.nome_usuario}
+    
+    if form_edit_user.validate_on_submit():
+        if imagem.data.filename != "":
+            nome_arquivo = secure_filename(imagem.data.filename)
+            arquivo_atual = os.path.split(current_user.caminho_foto)[1]
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'],arquivo_atual))
+            imagem.data.save(os.path.join(app.config['UPLOAD_FOLDER'],nome_arquivo))
+            current_user.caminho_foto = "img/" + nome_arquivo
+        current_user.nome_completo = nome.data
+        current_user.usuario = usuario.data
+        current_user.email = email.data
+        
+        db.session.merge(current_user)
+        db.session.commit()
+
+        return redirect('/home')
+    
+    return render_template('editar_usuario.html',form=form_edit_user)
+
 @app.route('/logar_usuario',methods=['get','post'])
 def logar_usuario():
     erro_de_login = None
@@ -98,10 +131,14 @@ def cadastrar_cidade():
                 break
 
         cidade_valida = verificar_cidade(form_cad_city.nome_cidade.data)
+
         if cidade_valida is not None:
             nova_cidade =  CidadeModel(str(id_gerado),form_cad_city.nome_cidade.data,
                 current_user.cpf_usuario,form_cad_city.favorita.data,form_cad_city.notificacao.data,
                 form_cad_city.descricao_cidade.data)
+
+            current_user.lista_cidades.append(nova_cidade)
+            db.session.merge(current_user)
             db.session.add(nova_cidade)
             db.session.commit()
             return redirect('/home')
@@ -114,7 +151,7 @@ def cadastrar_cidade():
 @app.route('/lista_cidades',methods=['get','post'])
 @login_required
 def listar_cidades():
-    cidades = CidadeModel.query.filter_by(cpf_usuario=current_user.cpf_usuario).all()
+    cidades = current_user.lista_cidades
     return render_template('lista_city.html',cidades=cidades)
 
 @app.route('/deletar_cidade/<string:id>',methods=['get','post'])
@@ -132,9 +169,19 @@ def editar_cidade(id):
     cidade = CidadeModel.query.get_or_404(id)
     form_edicao_city = EdicaoCidadeForm()
     if form_edicao_city.validate_on_submit():
-        cidade.descricao = form_edicao_city.descricao_cidade.data
-        cidade.favorito = form_edicao_city.favorita.data
-        cidade.notificavel = form_edicao_city.notificacao.data
+
+        #condições
+        descr_diferente = form_edicao_city.descricao_cidade.data != cidade.descricao
+        fav_diferente = form_edicao_city.favorita != cidade.favorito
+        notific_diferente = form_edicao_city.notificacao.data != cidade.notificavel
+        if cidade.descricao is not None and descr_diferente:
+            cidade.descricao = form_edicao_city.descricao_cidade.data
+        if cidade.favorito is not None and fav_diferente:
+            cidade.favorito = form_edicao_city.favorita.data
+        if cidade.notificavel is not None and notific_diferente:
+            cidade.notificavel = form_edicao_city.notificacao.data
+
+        db.session.merge(cidade)
         db.session.commit()
         return redirect('/lista_cidades') 
     return render_template('editar_city.html',form=form_edicao_city,cidade=cidade)
@@ -188,6 +235,15 @@ def mostrar_avaliacao_site():
 @login_manager.user_loader
 def load_user(cpf_usuario):
     return UsuarioModel.query.filter_by(cpf_usuario=cpf_usuario).first()
+
+
+@app.route('/perfil',methods=['get','post'])
+@login_required
+def carregar_perfil():
+    return render_template('perfil.html',foto=current_user.caminho_foto)
+
+
+
 
 def verificar_cidade(nome_cidade:str):
     try:

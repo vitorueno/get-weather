@@ -1,4 +1,5 @@
 {%from "form_helpers.html" import render_field %} 
+{% extends "bootstrap/base.html" %}
 
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -6,11 +7,16 @@
     <meta charset="UTF-8">
     <title>avaliacao teste</title>
 </head>
+<body>
+    {% block content %}
+    
+    
     <form action="/avaliacao_form" method="post">
     {{form.csrf_token}}
     {{render_field(form.nota)}}
     {{render_field(form.comentario)}}
     {{form.avaliar(class="btn btn-primary btn-lg")}}
     </form>
+    {% endblock content %}
 </body>
 </html>

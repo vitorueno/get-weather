@@ -30,8 +30,15 @@
                     <a href="{{ url_for('mostrar_avaliacao_site') }}">Nota média do site</a>
                 </li>
                 <li class="list-group-item">
-                        <a href="{{ url_for('deslogar_usuario') }}" class="btn btn-primary">Deslogar</a>
+                    <a href="{{ url_for('carregar_perfil') }}">Perfil de usuário</a>
                 </li>
+                <li class="list-group-item">
+                    <a href="{{ url_for('editar_usuario') }}">Editar usuário</a>
+                </li>
+                <li class="list-group-item">
+                    <a href="{{ url_for('deslogar_usuario') }}" class="btn btn-primary">Deslogar</a>
+                </li>
+                
                 
             {% endif %}
         </ul>

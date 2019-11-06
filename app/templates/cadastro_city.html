@@ -1,4 +1,5 @@
 {%from "form_helpers.html" import render_field %} 
+{% extends "bootstrap/base.html" %}
 
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -7,6 +8,9 @@
     <title>test cadastro cidade</title>
 </head>
 <body>
+    {% block content %}
+    
+    
     <form action="cadastrar_cidade" method="POST">
         {{form.csrf_token}}
         {{ render_field(form.nome_cidade) }}
@@ -15,5 +19,6 @@
         {{ render_field(form.notificacao) }}
         {{ form.enviar }}
     </form>
+    {% endblock content %}
 </body>
 </html>

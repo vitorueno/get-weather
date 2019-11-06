@@ -22,15 +22,23 @@ ERROS = {
 
 class CadastroUsuarioForm(FlaskForm):
     nome_completo = StringField("nome completo", validators=[InputRequired(message=ERROS['requerido'])])
+
     nome_usuario = StringField("nome de usuário", validators=[Length(min=1,max=20,message=ERROS['quant_caracter_usuario']),
         InputRequired(message=ERROS['requerido'])])
+
     senha = PasswordField("Senha", validators=[InputRequired(message=ERROS['requerido']),Length(min=3,max=32,message=ERROS['tamanho_senha'])])
+
     confirmacao_senha = PasswordField("Digite a Senha novamente", validators=[InputRequired(message=ERROS['requerido']),
         Length(min=3,max=32,message=ERROS['tamanho_senha']), EqualTo('senha',message=ERROS['senhas_iguais'])])
-    email = StringField("email", validators=[Email(message=ERROS['email']),Length(min=10,max=256,message=ERROS['tamanho_email']),
+
+    email = StringField("email", validators=[Email(message=ERROS['email']),Length(min=10,max=256,message=ERROS['tamanho_email']), 
         InputRequired(message=ERROS['requerido']) ])
-    imagem = FileField('Foto de Perfil', validators=[FileRequired(message=['file_required']),FileAllowed(['jpg', 'png'],message=ERROS['arquivo_foto']) ])
+
+    imagem = FileField('Foto de Perfil', validators=[FileRequired(message=['file_required']),
+        FileAllowed(['jpg', 'png'],message=ERROS['arquivo_foto']) ])
+
     cpf = StringField("cpf", validators=[InputRequired(message=ERROS['requerido']),Length(min=11,max=14,message=ERROS['tamanho_cpf'])])
+
     enviar = SubmitField("enviar")
 
 class LoginUsuarioForm(FlaskForm):
@@ -58,3 +66,20 @@ class AvaliacaoSiteForm(FlaskForm):
     comentario = TextAreaField("Comentário sobre o site")
     avaliar = SubmitField("avaliar site")
     
+class EdicaoUsuarioForm(FlaskForm):
+    nome_completo = StringField("nome completo", validators=[InputRequired(message=ERROS['requerido'])])
+
+    nome_usuario = StringField("nome de usuário", validators=[Length(min=1,max=20,message=ERROS['quant_caracter_usuario']),
+        InputRequired(message=ERROS['requerido'])])
+
+    '''senha = PasswordField("Senha", validators=[InputRequired(message=ERROS['requerido']),Length(min=3,max=32,message=ERROS['tamanho_senha'])])
+
+    confirmacao_senha = PasswordField("Digite a Senha novamente", validators=[InputRequired(message=ERROS['requerido']),
+        Length(min=3,max=32,message=ERROS['tamanho_senha']), EqualTo('senha',message=ERROS['senhas_iguais'])])'''
+
+    email = StringField("email", validators=[Email(message=ERROS['email']),Length(min=10,max=256,message=ERROS['tamanho_email']), 
+        InputRequired(message=ERROS['requerido']) ],)
+
+    imagem = FileField('Foto de Perfil', validators=[FileAllowed(['jpg', 'png'],message=ERROS['arquivo_foto']) ])
+
+    editar = SubmitField("Editar Perfil")

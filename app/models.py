@@ -21,15 +21,8 @@ class UsuarioModel(db.Model,UserMixin):
         self.set_senha_hash(senha)
         self.caminho_foto = caminho_foto
 
-
     def get_id(self):
         return self.cpf_usuario
-
-    def get_nome_usuario(self):
-        return self.nome_usuario
-
-    def get_email(self):
-        return self.email
 
     def set_senha_hash(self,senha):
         self.senha_hash = generate_password_hash(senha)
@@ -37,9 +30,6 @@ class UsuarioModel(db.Model,UserMixin):
     def checar_senha(self, senha):
         return check_password_hash(self.senha_hash, senha) 
 
-    def set_cpf(self,cpf):
-        if self.validar_cpf(cpf):
-            self.cpf = cpf
 
 
 class CidadeModel(db.Model):

@@ -1,3 +1,5 @@
+{% extends "bootstrap/base.html" %}
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -5,6 +7,9 @@
     <title>Nota site test</title>
 </head>
 <body>
+    {% block content %}
+    
+    <div class="container">
     <h1>Avaliação do site</h1>
     <h3>{{media}}</h3>
 
@@ -16,5 +21,7 @@
             <hr>
         {%endif%}
     {%endfor%}
+    </div>
+    {% endblock content %}
 </body>
 </html>
