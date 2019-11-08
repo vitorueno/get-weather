@@ -18,11 +18,59 @@ from app.forms import (CadastroUsuarioForm,LoginUsuarioForm,CadastroCidadeForm,
 @app.route('/',methods=['get','post'])
 @app.route('/home',methods=['get','post'])
 def carregar_index():
-    return render_template('index.html')
+    
+    #formulário de cadastro
+    form_cad_user = CadastroUsuarioForm()
+    if form_cad_user.validate_on_submit():
+        nome_arquivo = secure_filename(form_cad_user.imagem.data.filename)
+        form_cad_user.imagem.data.save(os.path.join(app.config['UPLOAD_FOLDER'],nome_arquivo))
+
+        #padronizar formato do cpf(sem ponto e traço)
+        form_cad_user.cpf.data = padronizar_cpf(form_cad_user.cpf.data)
+
+        #clausulas dos futuros ifs de verificação (conteúdos únicos no BD e validação de cpf)
+        cpf_ja_cadastrado = UsuarioModel.query.filter_by(cpf_usuario=form_cad_user.cpf.data).first()
+        usuario_ja_cadastrado = UsuarioModel.query.filter_by(nome_usuario=form_cad_user.nome_usuario.data).first()
+        cpf_valido = validar_cpf(form_cad_user.cpf.data)
+        email_ja_cadastrado = UsuarioModel.query.filter_by(email=form_cad_user.email.data).first()
+
+        #inicio das verificações
+        if not cpf_ja_cadastrado: #verifica se o cpf já não está cadastrado (erro chave 1ª)
+            if cpf_valido: #verifica se o cpf é válido (regras gorverno)
+                if not usuario_ja_cadastrado: #verifica se o nome de usuário ja foi usado
+                    if not email_ja_cadastrado:
+                        novo_usuario = UsuarioModel(form_cad_user.cpf.data,form_cad_user.nome_completo.data,
+                            form_cad_user.nome_usuario.data,form_cad_user.email.data,form_cad_user.senha.data,
+                            "img/"+nome_arquivo)
+                        db.session.add(novo_usuario)
+                        db.session.commit()
+                        return redirect('/home')
+                    else:
+                        #email ja foi usado, mostrará um erro
+                        form_cad_user.email.errors.append('Email já cadastrado. Por favor tente outro')
+                else:
+                    #nome de usuário ja foi usado, mostrará um erro
+                    form_cad_user.nome_usuario.errors.append('Nome de usuário já cadastrado. Por favor tente outro')
+            else:
+                #cpf já foi usado, logo mostrará um erro
+                form_cad_user.cpf.errors.append('CPF inválido. Por favor, informe outro.') 
+        else:
+            #se cpf já estiver cadastrado
+            form_cad_user.cpf.errors.append('CPF já cadastrado. Por favor, tente outro.') 
+
+    #Conteúdo da página inicial
+    cidades=['Berlin','Tokyo','New York','Washington','Brasilia','Moscow']
+    climas = []
+    for cidade in cidades:
+        objeto_clima = coletar_objetos_climaticos(cidade)[0]
+        clima_atual = objeto_clima.get_weather()
+        climas.append(clima_atual)
+
+    return render_template('index.html',climas=climas,form_cad_user=form_cad_user)
 
 @app.route('/cadastrar_usuario',methods=['get','post'])
 def cadastrar_usuario():
-    form_cad_user = CadastroUsuarioForm()
+    #form_cad_user = CadastroUsuarioForm()
     if form_cad_user.validate_on_submit():
         nome_arquivo = secure_filename(form_cad_user.imagem.data.filename)
         form_cad_user.imagem.data.save(os.path.join(app.config['UPLOAD_FOLDER'],nome_arquivo))
@@ -130,7 +178,7 @@ def cadastrar_cidade():
             if busca_por_id_repetido is None:
                 break
 
-        cidade_valida = verificar_cidade(form_cad_city.nome_cidade.data)
+        cidade_valida = coletar_objetos_climaticos(form_cad_city.nome_cidade.data)
 
         if cidade_valida is not None:
             nova_cidade =  CidadeModel(str(id_gerado),form_cad_city.nome_cidade.data,
@@ -191,7 +239,7 @@ def editar_cidade(id):
 def exibir_cidade(id):
     cidade = CidadeModel.query.get_or_404(id)
     #carrega os objetos de observação
-    objeto_cidade,objeto_previsao = verificar_cidade(cidade.nome_cidade)
+    objeto_cidade,objeto_previsao = coletar_objetos_climaticos(cidade.nome_cidade)
     #coleta o clima atual da cidade
     clima_agora = objeto_cidade.get_weather()
     #coleta as previsões do objeto de previsão
@@ -245,11 +293,12 @@ def carregar_perfil():
 
 
 
-def verificar_cidade(nome_cidade:str):
+def coletar_objetos_climaticos(nome_cidade:str):
     try:
         objeto_cidade = api_clima.weather_at_place(nome_cidade.capitalize())
         objeto_previsao = api_clima.three_hours_forecast(nome_cidade.capitalize())
     except NotFoundError:
+        print("Cidade não encontrada: ",nome_cidade)
         return None
     else:
         return (objeto_cidade,objeto_previsao)

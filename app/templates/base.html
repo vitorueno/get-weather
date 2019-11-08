@@ -9,7 +9,7 @@
         <style type="text/css">
             
             body {
-                background-image: url({{url_for('static', filename='img/imgem_nevasca.jpg') }});
+                background-image: url( {{url_for('static', filename='img/imgem_nevasca.jpg') }});
                 background-repeat: no-repeat;
             }
 
@@ -79,18 +79,24 @@
             <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                <a class="nav-link" href="#">Lista de Cidades</a>
-                </li>
-                <li class="nav-item">
-                <a class="nav-link" href="#">Perfil</a>
-                </li>
-            </ul>
-            <button class="btn-primary" onclick="document.getElementById('modal-wrapper').style.display='block'"! style="width: 70px; border-radius: 7px;"> Entrar </button>
+            {% if current_user.is_authenticated %}
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                    <a class="nav-link" href="#">Lista de Cidades</a>
+                    </li>
+                    <li class="nav-item">
+                    <a class="nav-link" href="#">Perfil</a>
+                    </li>
+                </ul>
+                <span>Olá, {{current_user.nome_completo}}</span>
+            {% else %}
+            
+                <button class="btn-primary nav-item float-right" onclick="document.getElementById('modal-wrapper').style.display='block'"! style="width: 70px; border-radius: 7px;"> Entrar </button>
+            
+            {% endif %}    
             </div>
         </nav>
     </header>

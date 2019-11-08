@@ -9,42 +9,45 @@
 				<br><br>
 				<table class="table table-dark table-hover">
 					<tbody>
+						
 							<tr>
 								<td class="text-center">Berlim</td>
-								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ url_for('static', filename='img/img4.png') }}"></td>
-								<td class="text-center">Temperatura</td>
+								<td class="text-center"><img class="rounded" width="50" height="50" src="{{climas[0].get_weather_icon_url()}}"></td>
+								<td class="text-center">Temperatura: {{climas[0].get_temperature(unit='celsius')['temp']}} °C</td>
+						
 							</tr>
+						
 							<tr>
 								<td class="text-center">Tóquio</td>
-								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ url_for('static', filename='img/img5.png') }}"></td>
-								<td class="text-center">Temperatura</td>
+								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ climas[1].get_weather_icon_url() }}"></td>
+								<td class="text-center">Temperatura: {{climas[1].get_temperature(unit='celsius')['temp']}} °C</td>
 							</tr>
 							<tr>
 								<td class="text-center">Nova York</td>
-								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ url_for('static', filename='img/img6.png') }}"></td>
-								<td class="text-center">Temperatura</td>
+								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ climas[2].get_weather_icon_url() }}"></td>
+								<td class="text-center">Temperatura: {{climas[2].get_temperature(unit='celsius')['temp']}} °C</td>
 							</tr>
 							 <tr>
 								<td class="text-center">Washington</td>
-								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ url_for('static', filename='img/img4.png') }}"></td>
-								<td class="text-center">Temperatura</td>
+								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ climas[3].get_weather_icon_url() }}"></td>
+								<td class="text-center">Temperatura: {{climas[3].get_temperature(unit='celsius')['temp']}} °C</td>
 							</tr>
 							 <tr>
 								<td class="text-center">Brasília</td>
-								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ url_for('static', filename='img/img4.png') }}"></td>
-								<td class="text-center">Temperatura</td>
+								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ climas[4].get_weather_icon_url() }}"></td>
+								<td class="text-center">Temperatura: {{climas[4].get_temperature(unit='celsius')['temp']}} °C</td>
 							</tr>
 							 <tr>
 								<td class="text-center">Moscou</td>
-								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ url_for('static', filename='img/img4.png') }}"></td>
-								<td class="text-center">Temperatura</td>
+								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ climas[5].get_weather_icon_url() }}"></td>
+								<td class="text-center">Temperatura: {{climas[5].get_temperature(unit='celsius')['temp']}} °C</td>
 							</tr>
 						</tbody>
 				</table>
 				<br><br><br><br><br>
 			<div id="modal-wrapper" class="modal">
 			
-			 <form class="modal-content animate" action="/action_page.php">
+			
 						
 				<div class="imgcontainer">
 					<span onclick="document.getElementById('modal-wrapper').style.display='none'" class="close" title="Close PopUp">&times;</span>
@@ -52,17 +55,32 @@
 				</div>
 		
 				<div class="container">
-					<input type="text" placeholder="Nome de Usuário" name="uname">
-					<input type="password" placeholder="Senha" name="psw">
-					<br><br>
-					<center>   
-						<button type="submit" class="btn-primary" style="width: 90px;">Login</button>  
+					<form action="/home" method="POST" enctype="multipart/form-data">
+						{{form_cad_user.csrf_token}}
+						{{render_field(form_cad_user.nome_completo)}}
+						{{render_field(form_cad_user.nome_usuario)}}
+						{{render_field(form_cad_user.cpf)}}
+						{{render_field(form_cad_user.email)}}
+						{{render_field(form_cad_user.senha)}}
+						{{render_field(form_cad_user.confirmacao_senha)}}
+						{{render_field(form_cad_user.imagem)}}
+						{{form_cad_user.enviar(class="btn btn-primary btn-lg",style="width: 90px;")}}
+						<!--
+						<input type="text" placeholder="Nome de Usuário" name="uname">
+						<input type="password" placeholder="Senha" name="psw">
+						<br><br>
+						<center>   
+							<button type="submit" class="btn-primary" style="width: 90px;">Login</button>
+						</center>
+						-->
+					</form>
+					<center>
 						<br><br>
 						<a href="#" style="text-decoration:none;" onclick="document.getElementById('modal-wraper').style.display='block'"!>Cadastre-se</a>
 					</center>
 				</div>
 				
-			</form>
+			
 			
 		</div>
 			<div id="modal-wraper" class="modal" style="top:40px;">
