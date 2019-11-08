@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+	{% block main %}
+				<br><br><br><br>
+				<div class="jumbotron" style="background-color: #f5f5f0;">
+					<h1>Capitais Mundiais</h1>
+					<p>Previsão do tempo das principais cidades do mundo</p>
+				</div>
+				<br><br>
+				<table class="table table-dark table-hover">
+					<tbody>
+							<tr>
+								<td class="text-center">Berlim</td>
+								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ url_for('static', filename='img/img4.png') }}"></td>
+								<td class="text-center">Temperatura</td>
+							</tr>
+							<tr>
+								<td class="text-center">Tóquio</td>
+								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ url_for('static', filename='img/img5.png') }}"></td>
+								<td class="text-center">Temperatura</td>
+							</tr>
+							<tr>
+								<td class="text-center">Nova York</td>
+								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ url_for('static', filename='img/img6.png') }}"></td>
+								<td class="text-center">Temperatura</td>
+							</tr>
+							 <tr>
+								<td class="text-center">Washington</td>
+								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ url_for('static', filename='img/img4.png') }}"></td>
+								<td class="text-center">Temperatura</td>
+							</tr>
+							 <tr>
+								<td class="text-center">Brasília</td>
+								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ url_for('static', filename='img/img4.png') }}"></td>
+								<td class="text-center">Temperatura</td>
+							</tr>
+							 <tr>
+								<td class="text-center">Moscou</td>
+								<td class="text-center"><img class="rounded" width="50" height="50" src="{{ url_for('static', filename='img/img4.png') }}"></td>
+								<td class="text-center">Temperatura</td>
+							</tr>
+						</tbody>
+				</table>
+				<br><br><br><br><br>
+			<div id="modal-wrapper" class="modal">
+			
+			 <form class="modal-content animate" action="/action_page.php">
+						
+				<div class="imgcontainer">
+					<span onclick="document.getElementById('modal-wrapper').style.display='none'" class="close" title="Close PopUp">&times;</span>
+					<h1 style="text-align:center">Login</h1>
+				</div>
+		
+				<div class="container">
+					<input type="text" placeholder="Nome de Usuário" name="uname">
+					<input type="password" placeholder="Senha" name="psw">
+					<br><br>
+					<center>   
+						<button type="submit" class="btn-primary" style="width: 90px;">Login</button>  
+						<br><br>
+						<a href="#" style="text-decoration:none;" onclick="document.getElementById('modal-wraper').style.display='block'"!>Cadastre-se</a>
+					</center>
+				</div>
+				
+			</form>
+			
+		</div>
+			<div id="modal-wraper" class="modal" style="top:40px;">
+			
+			 <form class="modal-content animate" action="/action_page.php" style="width: 45%;">
+						
+				<div class="imgcontainer">
+					<span onclick="document.getElementById('modal-wraper').style.display='none'" class="close" title="Close PopUp">&times;</span>
+					<h1 style="text-align:center">Cadastro</h1>
+				</div>
+		
+				<div class="container">
+					<input type="text" placeholder="Nome Completo" name="uname">
+					<input type="text" placeholder="Nome de Usuário" name="uname">
+					<input type="text" placeholder="CPF" name="uname">
+					<input type="text" placeholder="e-mail" name="uname">
+					<input type="password" placeholder="Senha" name="psw">
+					<input type="password" placeholder="Corfirmar Senha" name="psw">
+					<br><br>
+					<center>   
+						<button type="submit" class="btn-primary" style="width: 90px;">Cadastrar</button>  
+					</center>
+				</div>
+			</form>
+		</div>
+		
+		<script>
+		var modal = document.getElementById('modal-wrapper');
+		window.onclick = function(event) {
+				if (event.target == modal) {
+						modal.style.display = "none";
+				}
+		}
+		</script>
+		
+		<script>
+		var modall = document.getElementById('modal-wraper');
+		window.onclick = function(event) {
+				if (event.target == modall) {
+						modall.style.display = "none";
+				}
+		}
+		</script>
+		</main>
+	
+{% endblock main%}

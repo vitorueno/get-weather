@@ -18,7 +18,7 @@ from app.forms import (CadastroUsuarioForm,LoginUsuarioForm,CadastroCidadeForm,
 @app.route('/',methods=['get','post'])
 @app.route('/home',methods=['get','post'])
 def carregar_index():
-    return render_template('test.html')
+    return render_template('index.html')
 
 @app.route('/cadastrar_usuario',methods=['get','post'])
 def cadastrar_usuario():

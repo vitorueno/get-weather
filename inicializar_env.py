@@ -13,7 +13,7 @@ def ativar_env():
         os.system('call env/Scripts/activate')
             
     if platform.system() == "Linux":
-        os.system('source env/Scripts/activate')
+        os.system('source env/bin/activate')
 
 def baixar_requirements():
     if platform.system() == "Windows" or platform.system() == "Linux":
@@ -21,5 +21,6 @@ def baixar_requirements():
 
 
 if __name__ == "__main__":
-    criar_env()
-    ativar_env()
+    #criar_env()
+    #ativar_env()
+    baixar_requirements()

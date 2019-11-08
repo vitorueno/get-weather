@@ -35,7 +35,7 @@ class CadastroUsuarioForm(FlaskForm):
         InputRequired(message=ERROS['requerido']) ])
 
     imagem = FileField('Foto de Perfil', validators=[FileRequired(message=['file_required']),
-        FileAllowed(['jpg', 'png'],message=ERROS['arquivo_foto']) ])
+        FileAllowed(['jpg', 'png','jpeg'],message=ERROS['arquivo_foto']) ])
 
     cpf = StringField("cpf", validators=[InputRequired(message=ERROS['requerido']),Length(min=11,max=14,message=ERROS['tamanho_cpf'])])
 
@@ -80,6 +80,6 @@ class EdicaoUsuarioForm(FlaskForm):
     email = StringField("email", validators=[Email(message=ERROS['email']),Length(min=10,max=256,message=ERROS['tamanho_email']), 
         InputRequired(message=ERROS['requerido']) ],)
 
-    imagem = FileField('Foto de Perfil', validators=[FileAllowed(['jpg', 'png'],message=ERROS['arquivo_foto']) ])
+    imagem = FileField('Foto de Perfil', validators=[FileAllowed(['jpg', 'png','jpeg'],message=ERROS['arquivo_foto']) ])
 
     editar = SubmitField("Editar Perfil")
