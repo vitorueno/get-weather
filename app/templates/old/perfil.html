@@ -1,0 +1,28 @@
+{% extends "bootstrap/base.html" %}
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil</title>
+</head>
+
+<body>
+    {% block content %}
+    <div class="container">
+
+        <h1>Perfil</h1>
+        <h2>Nome: {{current_user.nome_completo}}</h2>
+        <h2>Usuario: {{current_user.nome_usuario}}</h2>
+        <h2>Email: {{current_user.email}}</h2>
+
+        <img src="static/{{foto}}" class="img img-fluid">
+
+        <br>
+        <br>
+        <a class="btn btn-primary" href="{{ url_for('carregar_index') }}">Página inicial</a>
+        <a class="btn btn-primary" href="{{ url_for('editar_usuario') }}">Editar usuário</a> {% endblock content %}
+    </div>
+</body>
+
+</html>

@@ -1,24 +1,24 @@
-{%from "form_helpers.html" import render_field %} 
-{% extends "bootstrap/base.html" %}
+{% extends 'base.html' %}
 
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>test cadastro cidade</title>
-</head>
-<body>
-    {% block content %}
-    
-    
-    <form action="cadastrar_cidade" method="POST">
-        {{form.csrf_token}}
-        {{ render_field(form.nome_cidade) }}
-        {{ render_field(form.descricao_cidade) }}
-        {{ render_field(form.favorita) }}
-        {{ render_field(form.notificacao) }}
-        {{ form.enviar }}
-    </form>
-    {% endblock content %}
-</body>
-</html>
+{% block main %}
+<br><br><br>
+<div class="container">
+<h2>Cadastrar Cidade</h2>
+<form action="cadastrar_cidade" method="POST">
+    {{form.csrf_token}} 
+    <div class="form-group">
+    {{ render_field(form.nome_cidade,class="form-control") }}
+    </div>
+    <div class="form-group">
+    {{ render_field(form.descricao_cidade,class="form-control") }} 
+    </div>
+    <div class="form-group">
+    {{ render_field(form.favorita) }}
+    </div>
+    <div class="form-group">
+    {{ render_field(form.notificacao) }} 
+    </div>
+    {{ form.enviar }}
+</form>
+</div>
+{% endblock main %}

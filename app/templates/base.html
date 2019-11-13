@@ -1,121 +1,54 @@
-{% extends "bootstrap/base.html" %}
-{%from "form_helpers.html" import render_field %} 
-
-{% block content %}
+{% extends "bootstrap/base.html" %} {%from "form_helpers.html" import render_field %} {% block content %}
 <!DOCTYPE html>
 <html>
-    <head>
-        <link rel="shortcut icon" type="image/x-icon" href="img/logo.ico">
-        <style type="text/css">
-            
-            body {
-                background-image: url( {{url_for('static', filename='img/imgem_nevasca.jpg') }});
-                background-repeat: no-repeat;
-            }
 
-            *{margin:0px; padding:0px; font-family:Helvetica, Arial, sans-serif;}
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="img/logo.ico">
+</head>
 
-            input[type=text], input[type=password] {
-                width: 90%;
-                padding: 12px 20px;
-                margin: 8px 26px;
-                display: inline-block;
-                border: 1px solid #ccc;
-                box-sizing: border-box;
-                font-size:16px;
-            }
-
-
-            .modal {
-                display:none;
-                position: fixed;
-                z-index: 1;
-                left: 0;
-                top: 70px;
-                width: 100%;
-                height: 100%;
-                overflow: auto;
-                background-color: rgba(0,0,0,0.4);
-            }
-
-            /* Modal Content Box */
-            .modal-content {
-                background-color: #fefefe;
-                margin: 4% auto 15% auto;
-                border: 1px solid #888;
-                width: 40%;
-                padding-bottom: 30px;
-            }
-
-            .close {
-                position: absolute;
-                right: 25px;
-                top: 0;
-                color: #000;
-                font-size: 35px;
-                font-weight: bold;
-            }
-            .close:hover,.close:focus {
-                color: red;
-                cursor: pointer;
-            }
-
-            .animate {
-                animation: zoom 0.6s
-            }
-            @keyframes zoom {
-            from {transform: scale(0)}
-            to {transform: scale(1)}
-            }
-        </style>
-    </head>
-
-    <header>
-            <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-                <img src="{{ url_for('static', filename='') }}" alt="">
-            <img src="{{ url_for('static', filename='img/icone.png') }}" height="40px" width="40px">
-            <a class="navbar-brand" href="#" style="margin-left:10px;">Get Weather</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+<header>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <img src="{{ url_for('static', filename='') }}" alt="">
+        <img src="{{ url_for('static', filename='img/icone.png') }}" height="40px" width="40px">
+        <a class="navbar-brand" href="{{ url_for('carregar_index') }}" style="margin-left:10px;">Get Weather</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarCollapse">
+        <div class="collapse navbar-collapse" id="navbarCollapse">
             {% if current_user.is_authenticated %}
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item active">
-                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item">
-                    <a class="nav-link" href="#">Lista de Cidades</a>
-                    </li>
-                    <li class="nav-item">
-                    <a class="nav-link" href="#">Perfil</a>
-                    </li>
-                </ul>
-                <span>Olá, {{current_user.nome_completo}}</span>
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ url_for('carregar_index') }}">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('listar_cidades') }}">Lista de Cidades</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('carregar_perfil') }}">Perfil</a>
+                </li>
+            </ul>
+
+            <h6 class="nav-item text-white text-center" style="padding-right:1rem;">Olá, {{current_user.nome_completo}}</h6>
+            <a class="nav-link btn btn-primary" href="{{ url_for('deslogar_usuario') }}">Sair</a>
             {% else %}
-            
-                <button class="btn-primary nav-item float-right" onclick="document.getElementById('modal-wrapper').style.display='block'"! style="width: 70px; border-radius: 7px;"> Entrar </button>
-            
-            {% endif %}    
-            </div>
-        </nav>
-    </header>
+                <button class="btn-primary btn nav-item" onclick="document.getElementById('modal-wrapper').style.display='block'" ! style="width: 70px; border-radius: 7px;"> Entrar </button> 
+            {% endif %}
+        </div>
+    </nav>
+</header>
 
-    <main>
-        {% block main %}
-        
-        {% endblock main %}
-    </main>
+<main>
+    {% block main %} {% endblock main %}
+</main>
 
-    <footer class="text-center" style="background-color: #e9ecef;padding-bottom: 10px; padding-top: 10px;">
-            <div class="container" style="font-size: 15px">
-                <p class="text">O Get Weather é um site desenvolvido com o intuito de disponibilizar informações relacionadas ao clima em todo o mundo. Foi desenvolvido a partir de um trabalho acadêmico dos alunos do Instituo federal Catarinense - campus Blumenau, sendo os alunos Beatriz Bauer, Diogenes H. Maçaneiro, Gabriel Gahio, Pedro Schumann, Teodoro Freiberger e Vítor Augusto U. Otto.</p>
-                <p>Contato: GetWeather@gmail.com ou +55 47 99256-4732</p>
-            </div>
-    </footer>
-    </body>
-    </html>
+<footer class="text-center" style="background-color: #e9ecef;padding-bottom: 10px; padding-top: 10px;">
+    <div class="container" style="font-size: 15px">
+        <p class="text">O Get Weather é um site desenvolvido com o intuito de disponibilizar informações relacionadas ao clima em todo o mundo. Foi desenvolvido a partir de um trabalho acadêmico dos alunos do Instituo federal Catarinense - campus Blumenau, sendo os alunos
+            Beatriz Bauer, Diogenes H. Maçaneiro, Gabriel Gahio, Pedro Schumann, Teodoro Freiberger e Vítor Augusto U. Otto.</p>
+        <p>Contato: GetWeather@gmail.com ou +55 47 99256-4732</p>
+    </div>
+</footer>
+</body>
+
+</html>
 {% endblock content %}
-
-
-

@@ -11,14 +11,27 @@ from flask_login import current_user, login_user, login_required, logout_user
 from werkzeug import secure_filename
 from app.models import UsuarioModel, CidadeModel, AvaliacaoSiteModel
 from app.forms import (CadastroUsuarioForm,LoginUsuarioForm,CadastroCidadeForm,
-    EdicaoCidadeForm, AvaliacaoSiteForm,EdicaoUsuarioForm)
+    EdicaoCidadeForm, AvaliacaoSiteForm,EdicaoUsuarioForm,AlterarSenhaForm)
 
 
-
+#página inicial + tela  de login + cadastro de usuário
 @app.route('/',methods=['get','post'])
 @app.route('/home',methods=['get','post'])
 def carregar_index():
-    
+    form_login = LoginUsuarioForm()
+    erro_de_login = None
+    if form_login.validate_on_submit():
+        usuario = UsuarioModel.query.filter_by(nome_usuario=form_login.nome_usuario.data).first()
+        if usuario is not None:
+            verificacao_senha = usuario.checar_senha(form_login.senha.data)
+            if verificacao_senha:
+                login_user(usuario,remember=form_login.lembreme.data)
+                return redirect('/home')
+            else:
+                erro_de_login = 'Usuário e/ou senha inválido. Por favor, digite outro.'
+        else:
+            erro_de_login = 'Usuário e/ou senha inválido. Por favor, digite outro.'
+
     #formulário de cadastro
     form_cad_user = CadastroUsuarioForm()
     if form_cad_user.validate_on_submit():
@@ -66,8 +79,9 @@ def carregar_index():
         clima_atual = objeto_clima.get_weather()
         climas.append(clima_atual)
 
-    return render_template('index.html',climas=climas,form_cad_user=form_cad_user)
+    return render_template('index.html',climas=climas,form_cad_user=form_cad_user,form_login=form_login,erro_login=erro_de_login)
 
+#cadastrar usuário isolado
 @app.route('/cadastrar_usuario',methods=['get','post'])
 def cadastrar_usuario():
     #form_cad_user = CadastroUsuarioForm()
@@ -110,21 +124,18 @@ def cadastrar_usuario():
             
     return render_template('cadastro_user.html',form=form_cad_user)
 
+#editar usuário
 @app.route('/editar_usuario',methods=['get','post'])
 @login_required
 def editar_usuario():
     form_edit_user = EdicaoUsuarioForm()
-
     #simplificando nomes
+    
     usuario = form_edit_user.nome_usuario
     nome = form_edit_user.nome_completo
     email = form_edit_user.email
     imagem = form_edit_user.imagem
 
-    email.render_kw = {"value":current_user.email}
-    nome.render_kw = {"value":current_user.nome_completo}
-    usuario.render_kw = {"value":current_user.nome_usuario}
-    
     if form_edit_user.validate_on_submit():
         if imagem.data.filename != "":
             nome_arquivo = secure_filename(imagem.data.filename)
@@ -139,10 +150,11 @@ def editar_usuario():
         db.session.merge(current_user)
         db.session.commit()
 
-        return redirect('/home')
+        return redirect('/perfil')
     
-    return render_template('editar_usuario.html',form=form_edit_user)
+    return render_template('Perfil.html',form=form_edit_user)
 
+#logar
 @app.route('/logar_usuario',methods=['get','post'])
 def logar_usuario():
     erro_de_login = None
@@ -160,12 +172,14 @@ def logar_usuario():
             erro_de_login = 'Usuário e/ou senha inválido. Por favor, digite outro.'
     return render_template('login_user.html',form=form_login,erro_login=erro_de_login)
 
+#logout usuário
 @app.route('/deslogar_usuario',methods=['get','post'])
 @login_required
 def deslogar_usuario():
     logout_user()
     return redirect('/home')
 
+#cadastrar cidade
 @app.route('/cadastrar_cidade',methods=['get','post'])
 @login_required
 def cadastrar_cidade():
@@ -189,19 +203,22 @@ def cadastrar_cidade():
             db.session.merge(current_user)
             db.session.add(nova_cidade)
             db.session.commit()
-            return redirect('/home')
+            return redirect('/lista_cidades')
         else:
             nome_cidade = form_cad_city.nome_cidade.data
             msg_erro_cidade = f'{nome_cidade} não é um nome de cidade válido para a API de clima. Por favor tente outro.' 
             form_cad_city.nome_cidade.errors.append(msg_erro_cidade)
     return render_template('cadastro_city.html',form=form_cad_city)
 
+#lista de cidades
 @app.route('/lista_cidades',methods=['get','post'])
 @login_required
 def listar_cidades():
     cidades = current_user.lista_cidades
-    return render_template('lista_city.html',cidades=cidades)
+    return render_template('lista_cidade.html',cidades=cidades)
 
+
+#deletar cidade
 @app.route('/deletar_cidade/<string:id>',methods=['get','post'])
 @login_required
 def deletar_cidade(id):
@@ -211,6 +228,7 @@ def deletar_cidade(id):
         db.session.commit()
         return redirect('/lista_cidades') 
 
+#editar cidade
 @app.route('/editar_cidade/<string:id>',methods=['get','post'])
 @login_required
 def editar_cidade(id):
@@ -234,6 +252,7 @@ def editar_cidade(id):
         return redirect('/lista_cidades') 
     return render_template('editar_city.html',form=form_edicao_city,cidade=cidade)
 
+#informações da cidade
 @app.route('/cidade/<string:id>',methods=['get','post'])
 @login_required
 def exibir_cidade(id):
@@ -250,6 +269,7 @@ def exibir_cidade(id):
     return render_template('city_weather.html',cidade=cidade,clima=clima_agora,
         previsoes=previsoes_clima, fuso = fuso_horario)
 
+#formulário de avaliação
 @app.route('/avaliacao_form',methods=['get','post'])
 @login_required
 def avaliar_site():
@@ -267,6 +287,7 @@ def avaliar_site():
         return redirect('/home')
     return render_template('avaliacao.html',form=form_avaliacao)
 
+#visualizar nota do site
 @app.route('/avaliacao_site',methods=['get','post'])
 @login_required
 def mostrar_avaliacao_site():
@@ -284,11 +305,58 @@ def mostrar_avaliacao_site():
 def load_user(cpf_usuario):
     return UsuarioModel.query.filter_by(cpf_usuario=cpf_usuario).first()
 
+@app.route('/excluir_conta',methods=['get','post'])
+@login_required
+def excluir_conta():
+    for cidade in current_user.lista_cidades:
+        db.session.delete(cidade)
+    arquivo_atual = os.path.split(current_user.caminho_foto)[1]
+    os.remove(os.path.join(app.config['UPLOAD_FOLDER'],arquivo_atual))
+    db.session.delete(current_user)
+    db.session.commit()
+    return redirect('/home')
 
+#perfil
 @app.route('/perfil',methods=['get','post'])
 @login_required
 def carregar_perfil():
-    return render_template('perfil.html',foto=current_user.caminho_foto)
+    form_edit_user = EdicaoUsuarioForm()
+    form_alterar_senha = AlterarSenhaForm()
+    
+    usuario = form_edit_user.nome_usuario
+    nome = form_edit_user.nome_completo
+    email = form_edit_user.email
+    imagem = form_edit_user.imagem
+
+    email.render_kw = {"value":current_user.email}
+    nome.render_kw = {"value":current_user.nome_completo}
+    usuario.render_kw = {"value":current_user.nome_usuario}
+    
+    if form_edit_user.validate_on_submit():
+        if imagem.data.filename != "":
+            nome_arquivo = secure_filename(imagem.data.filename)
+            arquivo_atual = os.path.split(current_user.caminho_foto)[1]
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'],arquivo_atual))
+            imagem.data.save(os.path.join(app.config['UPLOAD_FOLDER'],nome_arquivo))
+            current_user.caminho_foto = "img/" + nome_arquivo
+        current_user.nome_completo = nome.data
+        current_user.usuario = usuario.data
+        current_user.email = email.data
+        db.session.merge(current_user)
+        db.session.commit()
+        return redirect('/perfil')
+    
+    if form_alterar_senha.validate_on_submit():
+        if current_user.checar_senha(form_alterar_senha.senha_atual.data):
+            current_user.set_senha_hash(form_alterar_senha.nova_senha.data)
+            db.session.merge(current_user)
+            db.session.commit()
+            return redirect('/perfil')
+        else:
+            erro_senha = 'Senha incorreta, por favor tente novamente.'
+            form_alterar_senha.senha_atual.data.errors.append(erro_senha)
+        
+    return render_template('perfil.html',foto=current_user.caminho_foto,form_edit=form_edit_user,form_senha=form_alterar_senha)
 
 
 

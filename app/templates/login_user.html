@@ -1,26 +1,25 @@
-{%from "form_helpers.html" import render_field %} 
-{% extends "bootstrap/base.html" %}
+{%from "form_helpers.html" import render_field %} {% extends "bootstrap/base.html" %}
 
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Test login</title>
 </head>
+
 <body>
     {% block content %}
-    
-    
+
+
     <form action="logar_usuario" method="POST">
         {% if erro_login %}
-            <ul><li>{{erro_login}}</li></ul>
-        {% endif %}
-
-        {{form.csrf_token}}
-        {{render_field(form.nome_usuario)}}
-        {{render_field(form.senha)}}
-        {{ form.logar }}
+        <ul>
+            <li>{{erro_login}}</li>
+        </ul>
+        {% endif %} {{form.csrf_token}} {{render_field(form.nome_usuario)}} {{render_field(form.senha)}} {{ form.logar }}
     </form>
     {% endblock content %}
 </body>
+
 </html>

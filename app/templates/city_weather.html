@@ -1,10 +1,12 @@
 {% extends "bootstrap/base.html" %}
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>teste cidade</title>
 </head>
+
 <body>
     {% block content %}
     <div class="container">
@@ -19,46 +21,45 @@
         </div>
         <div class="row">
             <div class="col-sm-12">
-                    <h2>Tempo Agora: {{ clima.get_reference_time(timeformat='date').astimezone(fuso).strftime('%H:%M:%S - %d/%m/%Y') }}</h2>
-                    
-                    <ul>
-                        <li>Temperatura: {{ clima.get_temperature(unit='celsius')['temp']}}°C</li>
-                        <li>Descrição: {{ clima.get_detailed_status()}}</li>
-                        <li>Umidade: {{ clima.get_humidity() }}%</li>
-                        <li>Nuvens: {{ clima.get_clouds() }}%</li>
-                        {% for key in clima.get_rain().keys() %}
-                            <li>Chuva: {{ clima.get_rain()[key] }} mm</li>
-                        {% endfor %}
-                        {% for key in clima.get_snow().keys() %}
-                            <li>Neve: {{ previsao.get_snow()[key] }} mm</li>
-                        {% endfor %} 
-                        <li><img src="{{ clima.get_weather_icon_url() }}" alt="clima" class="img-responsive"></li>
-                    </ul>
+                <h2>Tempo Agora: {{ clima.get_reference_time(timeformat='date').astimezone(fuso).strftime('%H:%M:%S - %d/%m/%Y') }}</h2>
+
+                <ul>
+                    <li>Temperatura: {{ clima.get_temperature(unit='celsius')['temp']}}°C</li>
+                    <li>Descrição: {{ clima.get_detailed_status()}}</li>
+                    <li>Umidade: {{ clima.get_humidity() }}%</li>
+                    <li>Nuvens: {{ clima.get_clouds() }}%</li>
+                    {% for key in clima.get_rain().keys() %}
+                    <li>Chuva: {{ clima.get_rain()[key] }} mm</li>
+                    {% endfor %} {% for key in clima.get_snow().keys() %}
+                    <li>Neve: {{ previsao.get_snow()[key] }} mm</li>
+                    {% endfor %}
+                    <li><img src="{{ clima.get_weather_icon_url() }}" alt="clima" class="img-responsive"></li>
+                </ul>
             </div>
         </div>
         <div class="row">
             <div class="col-sm-12">
-                    <h2>Previsão do tempo</h2>
-                    {% for previsao in previsoes %}
-                        <h3>Horário da previsão: {{ previsao.get_reference_time(timeformat='date').astimezone(fuso).strftime('%H:%M:%S - %d/%m/%Y')}}</h3>
-                        <ul>
-                            <li>Temperatura: {{ previsao.get_temperature(unit='celsius')['temp']}}°C</li>
-                            <li>Descrição: {{ previsao.get_detailed_status()}}</li>
-                            <li>Umidade: {{ previsao.get_humidity() }}%</li>
-                            <li>Nuvens: {{ previsao.get_clouds() }}%</li>
-                            {% for key in previsao.get_rain().keys() %}
-                                <li>Chuva: {{ previsao.get_rain()[key] }} mm</li>
-                            {% endfor %}    
-                            {% for key in clima.get_snow().keys() %}
-                                <li>Neve: {{ previsao.get_snow()[key] }} mm</li>
-                            {% endfor %}    
-
-                            <li><img src="{{ previsao.get_weather_icon_url() }}" alt="clima" class="img-responsive"></li>
-                        </ul>
+                <h2>Previsão do tempo</h2>
+                {% for previsao in previsoes %}
+                <h3>Horário da previsão: {{ previsao.get_reference_time(timeformat='date').astimezone(fuso).strftime('%H:%M:%S - %d/%m/%Y')}}</h3>
+                <ul>
+                    <li>Temperatura: {{ previsao.get_temperature(unit='celsius')['temp']}}°C</li>
+                    <li>Descrição: {{ previsao.get_detailed_status()}}</li>
+                    <li>Umidade: {{ previsao.get_humidity() }}%</li>
+                    <li>Nuvens: {{ previsao.get_clouds() }}%</li>
+                    {% for key in previsao.get_rain().keys() %}
+                    <li>Chuva: {{ previsao.get_rain()[key] }} mm</li>
+                    {% endfor %} {% for key in clima.get_snow().keys() %}
+                    <li>Neve: {{ previsao.get_snow()[key] }} mm</li>
                     {% endfor %}
+
+                    <li><img src="{{ previsao.get_weather_icon_url() }}" alt="clima" class="img-responsive"></li>
+                </ul>
+                {% endfor %}
             </div>
         </div>
     </div>
     {% endblock content %}
 </body>
+
 </html>

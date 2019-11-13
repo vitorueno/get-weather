@@ -1,25 +1,25 @@
-{%from "form_helpers.html" import render_field %} 
-{% extends "bootstrap/base.html" %}
+{% extends 'base.html' %} 
 
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>test editar cidade</title>
-</head>
-<body>
-   {% block content %}
-   
-   
-    <h1>{{cidade.nome_cidade}}</h1>
-    <form action="/editar_cidade/{{ cidade.id }}" method="POST">
-        {{form.csrf_token}}
-        {{ render_field(form.descricao_cidade) }}
-        {{ render_field(form.favorita) }}
-        {{ render_field(form.notificacao) }}
-        {{ form.editar }}
+{% block main %}
+<br><br><br>
+
+<div class="container">
+<h2>Editar Cidade: {{cidade.nome_cidade}}</h2>
+<form action="/editar_cidade/{{ cidade.id }}" method="POST">
     
-    </form>
-    {% endblock content %}
-</body>
-</html>
+    {{form.csrf_token}}
+    <div class="form-group">
+    {{ render_field(form.descricao_cidade,class="form-control") }}
+    </div>  
+    <div class="form-group">
+    {{ render_field(form.favorita) }}
+    </div>
+    <div class="form-group">
+    {{ render_field(form.notificacao ) }}
+    </div>
+    {{ form.editar }}
+</form>
+    <br>
+    <a class="btn btn-primary" href="{{ url_for('listar_cidades') }}">Voltar para a lista de cidades</a>
+</div>
+{% endblock main %}

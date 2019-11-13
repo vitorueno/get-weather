@@ -31,7 +31,6 @@ class UsuarioModel(db.Model,UserMixin):
         return check_password_hash(self.senha_hash, senha) 
 
 
-
 class CidadeModel(db.Model):
     id = db.Column(db.String,primary_key=True)
     nome_cidade =  db.Column(db.String, nullable=False,unique=True)

@@ -1,26 +1,77 @@
-{% extends "bootstrap/base.html" %}
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Perfil</title>
-</head>
-<body>
-    {% block content %}
-    <div class="container">
-    
-    <h1>Perfil</h1>
-    <h2>Nome: {{current_user.nome_completo}}</h2>
-    <h2>Usuario: {{current_user.nome_usuario}}</h2>
-    <h2>Email: {{current_user.email}}</h2>
+{% extends 'base.html' %} 
 
-    <img src="static/{{foto}}" class="img img-fluid">
-    
-    <br>
-    <br>
-    <a class="btn btn-primary" href="{{ url_for('carregar_index') }}">Página inicial</a>
-    <a class="btn btn-primary" href="{{ url_for('editar_usuario') }}">Editar usuário</a>
-    {% endblock content %}
+{% block styles %}
+  {{super()}}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/perfil.css') }}">
+{% endblock styles %}
+
+
+{% block scripts %}
+  <script src="{{url_for('.static', filename='js/perfil.js')}}"></script>
+  {{super()}}
+{% endblock %}
+
+{% block main %}
+    <main>
+      <br><br><br>
+    <center>
+    <div class="quadrado">
+      <div class="card" style="width:40rem;" >
+        <img class="card-img-top" src= "static/{{ foto }}" alt="Imagem de Perfil" style="width: 9rem;" >
+        <div class="card-body">
+          
+          <h4 class="card-title">Nome Completo: {{ current_user.nome_completo }}</h4>
+          <h6 class="card-text">Nome de Usuário: {{ current_user.nome_usuario }}</h6>
+          <p class="card-text">CPF cadastrado: {{ current_user.cpf_usuario }}</p>
+          <p class="card-text">E-mail: {{ current_user.email }}</p>
+          <a class="btn btn-primary" onclick="document.getElementById('modal-wrapper').style.display='block'"!>Editar</a>
+          <a class="btn btn-primary" onclick="document.getElementById('modal-wrapper2').style.display='block'"! >Alterar senha</a>
+          <br><br>
+          
+          <a class="btn btn-danger" href="{{ url_for('excluir_conta') }}">Excluir Conta</a>
+        </div>
+      </div>
     </div>
-</body>
-</html>
+    
+    <div id="modal-wrapper" class="modal">
+      <form class="modal-content animate form" action="/perfil" method="post" enctype="multipart/form-data">
+      
+        <div class="imgcontainer">
+          <span onclick="document.getElementById('modal-wrapper').style.display='none'" class="close" title="Close PopUp">&times;</span>
+          <h1 style="text-align:center">Editar Dados</h1>
+        </div>
+
+        <div class="container">
+          {{form_edit.csrf_token}} 
+          {{render_field(form_edit.nome_completo,placeholder="Nome Completo")}} 
+          {{render_field(form_edit.nome_usuario,placeholder="Nome de Usuário")}}
+          {{render_field(form_edit.imagem,placeholder="Imagem")}} 
+          {{render_field(form_edit.email,placeholder="E-mail")}} 
+          {{form_edit.editar(class="btn btn-primary btn-lg")}}
+        </div>
+      </form> 
+    </div>
+    
+    <div id="modal-wrapper2" class="modal">
+        <form class="modal-content animate form" action="/perfil" method="post" enctype="multipart/form-data">
+        
+          <div class="imgcontainer">
+            <span onclick="document.getElementById('modal-wrapper2').style.display='none'" class="close" title="Close PopUp">&times;</span>
+            <h1 style="text-align:center">Editar Dados</h1>
+          </div>
+  
+          <div class="container">
+            {{form_senha.csrf_token}} 
+            {{render_field(form_senha.senha_atual,placeholder="Digite sua senha atual")}} 
+            {{render_field(form_senha.nova_senha,placeholder="Digite a nova senha")}}
+            {{render_field(form_senha.confirm_nova_senha,placeholder="Digite a nova senha novamente")}} 
+            {{form_senha.editar(class="btn btn-primary btn-lg")}}
+          </div>
+        </form> 
+      </div>
+    </center>
+
+  <br><br><br><br>
+  </main>
+
+{% endblock main %}

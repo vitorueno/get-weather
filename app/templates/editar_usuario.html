@@ -1,25 +1,27 @@
-{%from "form_helpers.html" import render_field %} 
-{% extends "bootstrap/base.html" %}
+{%from "form_helpers.html" import render_field %} {% extends "bootstrap/base.html" %}
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>cadastro teste</title>
 </head>
+
 <body>
     {% block content %}
     <div class="container">
 
-    
-    <form class="form" action="/editar_usuario" method="post" enctype="multipart/form-data">
-    {{form.csrf_token}}
-    {{render_field(form.nome_completo)}}
-    {{render_field(form.nome_usuario)}}
-    {{render_field(form.imagem)}}
-    {{render_field(form.email)}}
-    {{form.editar(class="btn btn-primary btn-lg")}}
-    </form>
-    {% endblock content %}
+
+        <form class="form" action="/editar_usuario" method="post" enctype="multipart/form-data">
+            {{form.csrf_token}} 
+            {{render_field(form.nome_completo)}} 
+            {{render_field(form.nome_usuario)}}
+            {{render_field(form.imagem)}} 
+            {{render_field(form.email)}} 
+            {{form.editar(class="btn btn-primary btn-lg")}}
+        </form>
+        {% endblock content %}
     </div>
 </body>
+
 </html>

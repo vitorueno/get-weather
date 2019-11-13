@@ -45,6 +45,7 @@ class LoginUsuarioForm(FlaskForm):
     nome_usuario = StringField("nome de usuário",validators=[InputRequired(message=ERROS['requerido']),
         Length(min=1,max=20,message=ERROS['quant_caracter_usuario']) ])
     senha = PasswordField("Senha",validators=[InputRequired(message=ERROS['requerido']), Length(min=3,max=32,message=ERROS['tamanho_senha'])])
+    lembreme = BooleanField("lembre-me")
     logar = SubmitField("logar")
 
 class CadastroCidadeForm(FlaskForm):
@@ -72,14 +73,22 @@ class EdicaoUsuarioForm(FlaskForm):
     nome_usuario = StringField("nome de usuário", validators=[Length(min=1,max=20,message=ERROS['quant_caracter_usuario']),
         InputRequired(message=ERROS['requerido'])])
 
-    '''senha = PasswordField("Senha", validators=[InputRequired(message=ERROS['requerido']),Length(min=3,max=32,message=ERROS['tamanho_senha'])])
-
-    confirmacao_senha = PasswordField("Digite a Senha novamente", validators=[InputRequired(message=ERROS['requerido']),
-        Length(min=3,max=32,message=ERROS['tamanho_senha']), EqualTo('senha',message=ERROS['senhas_iguais'])])'''
-
     email = StringField("email", validators=[Email(message=ERROS['email']),Length(min=10,max=256,message=ERROS['tamanho_email']), 
         InputRequired(message=ERROS['requerido']) ],)
 
     imagem = FileField('Foto de Perfil', validators=[FileAllowed(['jpg', 'png','jpeg'],message=ERROS['arquivo_foto']) ])
 
     editar = SubmitField("Editar Perfil")
+    
+class AlterarSenhaForm(FlaskForm):
+    senha_atual = PasswordField("Senha atual", validators=[InputRequired(message=ERROS['requerido']),
+                                                     Length(min=3,max=32,message=ERROS['tamanho_senha'])])
+
+    nova_senha = PasswordField("Nova Senha", validators=[InputRequired(message=ERROS['requerido']),
+                                                     Length(min=3,max=32,message=ERROS['tamanho_senha'])])
+    
+    confirm_nova_senha = PasswordField("Digite a Senha novamente", validators=[InputRequired(message=ERROS['requerido']),
+                                                                Length(min=3,max=32,message=ERROS['tamanho_senha']),
+                                                                EqualTo('nova_senha',message=ERROS['senhas_iguais'])])
+
+    editar = SubmitField("Editar Senha")

@@ -22,5 +22,5 @@ def baixar_requirements():
 
 if __name__ == "__main__":
     criar_env()
-    tivar_env()
+    ativar_env()
     baixar_requirements()
