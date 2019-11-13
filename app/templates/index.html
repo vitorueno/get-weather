@@ -48,74 +48,35 @@
             </tr>
         </tbody>
     </table>
+<br><br>
 
-
-<br><br><br><br><br>
-<div id="modal-wrapper" class="modal">
-    <form action="/home" method="POST" class="modal-content animate">
-        <div class="imgcontainer">
-            <span onclick="document.getElementById('modal-wrapper').style.display='none'" class="close" title="Close PopUp">&times;</span>
-            <h1 style="text-align:center">Login</h1>
-        </div>
-
-        <div class="container">
-            {% if erro_login %}
-                <div class="alert alert-danger aler-dismissible" >{{erro_login}}</div>
-            {% endif %} 
-            {{form_login.csrf_token}}
-            {{render_field(form_login.nome_usuario)}}
-            {{render_field(form_login.senha)}}
-            {{ render_field(form_login.lembreme) }}
-            {{ form_login.logar(class="btn btn-lg btn-primary",style="width:90px;") }}
-    </form>
-    <center>
-        <br><br>
-        <a href="#" style="text-decoration:none;" onclick="document.getElementById('modal-wraper').style.display='block'" !>Cadastre-se</a>
-    </center>
+<div class="container"> 
+    <div class="row">
+        <h1>Avaliação do site:</h1>
+    </div>
+    <div class="row">
+        {% if media != None %}
+            <h3>Nota média: {{media}}</h3>
+        {% else %}
+            <h3>Nenhuma avaliação do site foi feita. Volte mais tarde</h3>
+        {% endif %}
+        
     </div>
 
-
-
+    {%for avaliacao in avaliacoes%} 
+        {% if avaliacao.comentario|e %}
+            <div class="row">
+                <div class="card">
+                    <div class="card-header"><img src= "static/{{ avaliacao.caminho_foto }}" alt="Imagem de Perfil" style="width: 5rem;" > <h4>Usuaŕio: {{avaliacao.nome_usuario}}</h4> </div>
+                    <div class="card-content"> <h4>Comentário:</h4> <p>{{avaliacao.comentario}}</p></div>
+                </div>
+                
+            </div>
+        {% endif %}
+    {%endfor%}
 </div>
-<div id="modal-wraper" class="modal" style="top:40px;">
+    <br><br>
 
-    <form action="/home" method="POST" class="modal-content animate" enctype="multipart/form-data">
-        <div class="imgcontainer">
-            <span onclick="document.getElementById('modal-wraper').style.display='none'" class="close" title="Close PopUp">&times;</span>
-            <h1 style="text-align:center">Cadastro</h1>
-        </div>
-
-        <div class="container">
-            {{form_cad_user.csrf_token}}
-            {{render_field(form_cad_user.nome_completo)}}
-            {{render_field(form_cad_user.nome_usuario)}}
-            {{render_field(form_cad_user.cpf)}}
-            {{render_field(form_cad_user.email)}}
-            {{render_field(form_cad_user.senha)}}
-            {{render_field(form_cad_user.confirmacao_senha)}}
-            {{render_field(form_cad_user.imagem)}}
-            {{form_cad_user.enviar(class="btn btn-primary btn-lg",style="width: 90px;")}}
-        </div>
-    </form>
-</div>
-
-<script>
-    var modal = document.getElementById('modal-wrapper');
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-</script>
-
-<script>
-    var modall = document.getElementById('modal-wraper');
-    window.onclick = function(event) {
-        if (event.target == modall) {
-            modall.style.display = "none";
-        }
-    }
-</script>
 </main>
 
 {% endblock main%}

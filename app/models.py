@@ -50,17 +50,19 @@ class CidadeModel(db.Model):
 
 
 class AvaliacaoSiteModel(db.Model):
-    #usuario = db.relationship('UsuarioModel', back_populates='lista_cidades')
-    #id = db.Column(db.Integer,primary_key=True)
+    nome_usuario = db.Column(db.String(20),db.ForeignKey('usuario_model.nome_usuario'),nullable=False)
+    caminho_foto = db.Column(db.String,db.ForeignKey('usuario_model.caminho_foto'), nullable=True)
     cpf_usuario = db.Column(db.String(20), db.ForeignKey('usuario_model.cpf_usuario'),nullable=False, primary_key=True)
     nota = db.Column(db.Float,nullable=False)
     data = db.Column(db.DATE,nullable= False)
     comentario = db.Column(db.String)
 
-    def __init__(self,cpf_usuario,nota,data,comentario):
+    def __init__(self,nome_usuario,cpf_usuario,nota,data,comentario,caminho_foto):
+        self.nome_usuario = nome_usuario
         self.cpf_usuario = cpf_usuario
         self.nota = nota
         self.data = data
         self.comentario = comentario
+        self.caminho_foto = caminho_foto
     
     

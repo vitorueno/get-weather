@@ -1,22 +1,16 @@
-{%from "form_helpers.html" import render_field %} {% extends "bootstrap/base.html" %}
+{% extends 'base.html' %}
 
-<!DOCTYPE html>
-<html lang="pt-br">
-
-<head>
-    <meta charset="UTF-8">
-    <title>cadastro teste</title>
-</head>
-
-<body>
-    {% block content %}
-
-
+{% block main %}
+    <br><br><br>
+    <div class="container">
+    <fieldset>
     <form action="/cadastrar_usuario" method="post" enctype="multipart/form-data">
-        {{form.csrf_token}} {{render_field(form.nome_completo)}} {{render_field(form.nome_usuario)}} {{render_field(form.cpf)}} {{render_field(form.email)}} {{render_field(form.senha)}} {{render_field(form.confirmacao_senha)}} {{render_field(form.imagem)}} {{form.enviar(class="btn
-        btn-primary btn-lg")}}
+        {{wtf.quick_form(form)}}
     </form>
-    {% endblock content %}
-</body>
+    </fieldset>
+    <br><br>
 
-</html>
+    <a class="btn btn-outline-secondary" href="{{ url_for('logar_usuario') }}" >Logar</a>
+    </div>
+    
+{% endblock main %}

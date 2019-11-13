@@ -1,27 +1,10 @@
-{%from "form_helpers.html" import render_field %} {% extends "bootstrap/base.html" %}
-<!DOCTYPE html>
-<html lang="pt-br">
-
-<head>
-    <meta charset="UTF-8">
-    <title>cadastro teste</title>
-</head>
-
-<body>
-    {% block content %}
+{% extends 'base.html' %}
+    {% block main %}
+    <br><br><br>
     <div class="container">
-
-
+        <h1>Editar Usuário</h1>
         <form class="form" action="/editar_usuario" method="post" enctype="multipart/form-data">
-            {{form.csrf_token}} 
-            {{render_field(form.nome_completo)}} 
-            {{render_field(form.nome_usuario)}}
-            {{render_field(form.imagem)}} 
-            {{render_field(form.email)}} 
-            {{form.editar(class="btn btn-primary btn-lg")}}
+            {{ wtf.quick_form(form) }}
         </form>
-        {% endblock content %}
+        {% endblock main %}
     </div>
-</body>
-
-</html>

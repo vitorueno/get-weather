@@ -24,53 +24,20 @@
           <h6 class="card-text">Nome de Usuário: {{ current_user.nome_usuario }}</h6>
           <p class="card-text">CPF cadastrado: {{ current_user.cpf_usuario }}</p>
           <p class="card-text">E-mail: {{ current_user.email }}</p>
-          <a class="btn btn-primary" onclick="document.getElementById('modal-wrapper').style.display='block'"!>Editar</a>
-          <a class="btn btn-primary" onclick="document.getElementById('modal-wrapper2').style.display='block'"! >Alterar senha</a>
+          
+          <a class="btn btn-primary" href="{{ url_for('editar_usuario') }}">Editar</a>
+          <a class="btn btn-primary" href="{{ url_for('alterar_senha') }}" >Alterar senha</a>
           <br><br>
+          <a href="{{ url_for('avaliar_site') }}" class="btn btn-primary">Avaliar site</a>
+          <br><br>
+
           
           <a class="btn btn-danger" href="{{ url_for('excluir_conta') }}">Excluir Conta</a>
         </div>
       </div>
     </div>
     
-    <div id="modal-wrapper" class="modal">
-      <form class="modal-content animate form" action="/perfil" method="post" enctype="multipart/form-data">
-      
-        <div class="imgcontainer">
-          <span onclick="document.getElementById('modal-wrapper').style.display='none'" class="close" title="Close PopUp">&times;</span>
-          <h1 style="text-align:center">Editar Dados</h1>
-        </div>
-
-        <div class="container">
-          {{form_edit.csrf_token}} 
-          {{render_field(form_edit.nome_completo,placeholder="Nome Completo")}} 
-          {{render_field(form_edit.nome_usuario,placeholder="Nome de Usuário")}}
-          {{render_field(form_edit.imagem,placeholder="Imagem")}} 
-          {{render_field(form_edit.email,placeholder="E-mail")}} 
-          {{form_edit.editar(class="btn btn-primary btn-lg")}}
-        </div>
-      </form> 
-    </div>
-    
-    <div id="modal-wrapper2" class="modal">
-        <form class="modal-content animate form" action="/perfil" method="post" enctype="multipart/form-data">
-        
-          <div class="imgcontainer">
-            <span onclick="document.getElementById('modal-wrapper2').style.display='none'" class="close" title="Close PopUp">&times;</span>
-            <h1 style="text-align:center">Editar Dados</h1>
-          </div>
   
-          <div class="container">
-            {{form_senha.csrf_token}} 
-            {{render_field(form_senha.senha_atual,placeholder="Digite sua senha atual")}} 
-            {{render_field(form_senha.nova_senha,placeholder="Digite a nova senha")}}
-            {{render_field(form_senha.confirm_nova_senha,placeholder="Digite a nova senha novamente")}} 
-            {{form_senha.editar(class="btn btn-primary btn-lg")}}
-          </div>
-        </form> 
-      </div>
-    </center>
-
   <br><br><br><br>
   </main>
 

@@ -18,58 +18,14 @@ from app.forms import (CadastroUsuarioForm,LoginUsuarioForm,CadastroCidadeForm,
 @app.route('/',methods=['get','post'])
 @app.route('/home',methods=['get','post'])
 def carregar_index():
-    form_login = LoginUsuarioForm()
-    erro_de_login = None
-    if form_login.validate_on_submit():
-        usuario = UsuarioModel.query.filter_by(nome_usuario=form_login.nome_usuario.data).first()
-        if usuario is not None:
-            verificacao_senha = usuario.checar_senha(form_login.senha.data)
-            if verificacao_senha:
-                login_user(usuario,remember=form_login.lembreme.data)
-                return redirect('/home')
-            else:
-                erro_de_login = 'Usuário e/ou senha inválido. Por favor, digite outro.'
-        else:
-            erro_de_login = 'Usuário e/ou senha inválido. Por favor, digite outro.'
-
-    #formulário de cadastro
-    form_cad_user = CadastroUsuarioForm()
-    if form_cad_user.validate_on_submit():
-        nome_arquivo = secure_filename(form_cad_user.imagem.data.filename)
-        form_cad_user.imagem.data.save(os.path.join(app.config['UPLOAD_FOLDER'],nome_arquivo))
-
-        #padronizar formato do cpf(sem ponto e traço)
-        form_cad_user.cpf.data = padronizar_cpf(form_cad_user.cpf.data)
-
-        #clausulas dos futuros ifs de verificação (conteúdos únicos no BD e validação de cpf)
-        cpf_ja_cadastrado = UsuarioModel.query.filter_by(cpf_usuario=form_cad_user.cpf.data).first()
-        usuario_ja_cadastrado = UsuarioModel.query.filter_by(nome_usuario=form_cad_user.nome_usuario.data).first()
-        cpf_valido = validar_cpf(form_cad_user.cpf.data)
-        email_ja_cadastrado = UsuarioModel.query.filter_by(email=form_cad_user.email.data).first()
-
-        #inicio das verificações
-        if not cpf_ja_cadastrado: #verifica se o cpf já não está cadastrado (erro chave 1ª)
-            if cpf_valido: #verifica se o cpf é válido (regras gorverno)
-                if not usuario_ja_cadastrado: #verifica se o nome de usuário ja foi usado
-                    if not email_ja_cadastrado:
-                        novo_usuario = UsuarioModel(form_cad_user.cpf.data,form_cad_user.nome_completo.data,
-                            form_cad_user.nome_usuario.data,form_cad_user.email.data,form_cad_user.senha.data,
-                            "img/"+nome_arquivo)
-                        db.session.add(novo_usuario)
-                        db.session.commit()
-                        return redirect('/home')
-                    else:
-                        #email ja foi usado, mostrará um erro
-                        form_cad_user.email.errors.append('Email já cadastrado. Por favor tente outro')
-                else:
-                    #nome de usuário ja foi usado, mostrará um erro
-                    form_cad_user.nome_usuario.errors.append('Nome de usuário já cadastrado. Por favor tente outro')
-            else:
-                #cpf já foi usado, logo mostrará um erro
-                form_cad_user.cpf.errors.append('CPF inválido. Por favor, informe outro.') 
-        else:
-            #se cpf já estiver cadastrado
-            form_cad_user.cpf.errors.append('CPF já cadastrado. Por favor, tente outro.') 
+    #avaliação do site
+    avaliacoes = AvaliacaoSiteModel.query.all()
+    notas = []
+    comentarios = []
+    for avaliacao in avaliacoes:
+        notas.append(avaliacao.nota)
+        comentarios.append(avaliacao.comentario)
+    media = calcular_media_notas(notas)
 
     #Conteúdo da página inicial
     cidades=['Berlin','Tokyo','New York','Washington','Brasilia','Moscow']
@@ -79,12 +35,12 @@ def carregar_index():
         clima_atual = objeto_clima.get_weather()
         climas.append(clima_atual)
 
-    return render_template('index.html',climas=climas,form_cad_user=form_cad_user,form_login=form_login,erro_login=erro_de_login)
+    return render_template('index.html',climas=climas,media=media,comentarios=comentarios,avaliacoes=avaliacoes)
 
 #cadastrar usuário isolado
 @app.route('/cadastrar_usuario',methods=['get','post'])
 def cadastrar_usuario():
-    #form_cad_user = CadastroUsuarioForm()
+    form_cad_user = CadastroUsuarioForm()
     if form_cad_user.validate_on_submit():
         nome_arquivo = secure_filename(form_cad_user.imagem.data.filename)
         form_cad_user.imagem.data.save(os.path.join(app.config['UPLOAD_FOLDER'],nome_arquivo))
@@ -152,7 +108,23 @@ def editar_usuario():
 
         return redirect('/perfil')
     
-    return render_template('Perfil.html',form=form_edit_user)
+    return render_template('editar_usuario.html',form=form_edit_user)
+
+@app.route('/alterar_senha',methods=['get','post'])
+@login_required
+def alterar_senha():
+    form = AlterarSenhaForm()
+    if form.validate_on_submit():
+        if current_user.checar_senha(form_alterar_senha.senha_atual.data):
+            current_user.set_senha_hash(form_alterar_senha.nova_senha.data)
+            db.session.merge(current_user)
+            db.session.commit()
+            return redirect('/perfil')
+        else:
+            erro_senha = 'Senha incorreta, por favor tente novamente.'
+            form_alterar_senha.senha_atual.data.errors.append(erro_senha)
+        
+    return render_template('alterar_senha.html',form=form)
 
 #logar
 @app.route('/logar_usuario',methods=['get','post'])
@@ -215,7 +187,7 @@ def cadastrar_cidade():
 @login_required
 def listar_cidades():
     cidades = current_user.lista_cidades
-    return render_template('lista_cidade.html',cidades=cidades)
+    return render_template('Lista_cidade.html',cidades=cidades)
 
 
 #deletar cidade
@@ -280,26 +252,13 @@ def avaliar_site():
             db.session.delete(ja_avaliado)
             db.session.commit()
 
-        nova_avaliacao = AvaliacaoSiteModel(current_user.cpf_usuario,form_avaliacao.nota.data,
-            datetime.datetime.now(tz=pytz.utc),form_avaliacao.comentario.data)
+        nova_avaliacao = AvaliacaoSiteModel(current_user.nome_usuario,current_user.cpf_usuario,form_avaliacao.nota.data,
+            datetime.datetime.now(tz=pytz.utc),form_avaliacao.comentario.data,current_user.caminho_foto)
         db.session.add(nova_avaliacao)
         db.session.commit()
         return redirect('/home')
     return render_template('avaliacao.html',form=form_avaliacao)
 
-#visualizar nota do site
-@app.route('/avaliacao_site',methods=['get','post'])
-@login_required
-def mostrar_avaliacao_site():
-    avaliacoes = AvaliacaoSiteModel.query.all()
-    notas = []
-    comentarios = []
-    for avaliacao in avaliacoes:
-        notas.append(avaliacao.nota)
-        comentarios.append(avaliacao.comentario)
-    media = calcular_media_notas(notas)
-
-    return render_template('nota_site.html',media=media,comentarios=comentarios,avaliacoes=avaliacoes)
 
 @login_manager.user_loader
 def load_user(cpf_usuario):
@@ -320,43 +279,7 @@ def excluir_conta():
 @app.route('/perfil',methods=['get','post'])
 @login_required
 def carregar_perfil():
-    form_edit_user = EdicaoUsuarioForm()
-    form_alterar_senha = AlterarSenhaForm()
-    
-    usuario = form_edit_user.nome_usuario
-    nome = form_edit_user.nome_completo
-    email = form_edit_user.email
-    imagem = form_edit_user.imagem
-
-    email.render_kw = {"value":current_user.email}
-    nome.render_kw = {"value":current_user.nome_completo}
-    usuario.render_kw = {"value":current_user.nome_usuario}
-    
-    if form_edit_user.validate_on_submit():
-        if imagem.data.filename != "":
-            nome_arquivo = secure_filename(imagem.data.filename)
-            arquivo_atual = os.path.split(current_user.caminho_foto)[1]
-            os.remove(os.path.join(app.config['UPLOAD_FOLDER'],arquivo_atual))
-            imagem.data.save(os.path.join(app.config['UPLOAD_FOLDER'],nome_arquivo))
-            current_user.caminho_foto = "img/" + nome_arquivo
-        current_user.nome_completo = nome.data
-        current_user.usuario = usuario.data
-        current_user.email = email.data
-        db.session.merge(current_user)
-        db.session.commit()
-        return redirect('/perfil')
-    
-    if form_alterar_senha.validate_on_submit():
-        if current_user.checar_senha(form_alterar_senha.senha_atual.data):
-            current_user.set_senha_hash(form_alterar_senha.nova_senha.data)
-            db.session.merge(current_user)
-            db.session.commit()
-            return redirect('/perfil')
-        else:
-            erro_senha = 'Senha incorreta, por favor tente novamente.'
-            form_alterar_senha.senha_atual.data.errors.append(erro_senha)
-        
-    return render_template('perfil.html',foto=current_user.caminho_foto,form_edit=form_edit_user,form_senha=form_alterar_senha)
+    return render_template('perfil.html',foto=current_user.caminho_foto)
 
 
 

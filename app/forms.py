@@ -21,9 +21,9 @@ ERROS = {
 }
 
 class CadastroUsuarioForm(FlaskForm):
-    nome_completo = StringField("nome completo", validators=[InputRequired(message=ERROS['requerido'])])
+    nome_completo = StringField("Nome completo", validators=[InputRequired(message=ERROS['requerido'])])
 
-    nome_usuario = StringField("nome de usuário", validators=[Length(min=1,max=20,message=ERROS['quant_caracter_usuario']),
+    nome_usuario = StringField("Nome de usuário", validators=[Length(min=1,max=20,message=ERROS['quant_caracter_usuario']),
         InputRequired(message=ERROS['requerido'])])
 
     senha = PasswordField("Senha", validators=[InputRequired(message=ERROS['requerido']),Length(min=3,max=32,message=ERROS['tamanho_senha'])])
@@ -31,7 +31,7 @@ class CadastroUsuarioForm(FlaskForm):
     confirmacao_senha = PasswordField("Digite a Senha novamente", validators=[InputRequired(message=ERROS['requerido']),
         Length(min=3,max=32,message=ERROS['tamanho_senha']), EqualTo('senha',message=ERROS['senhas_iguais'])])
 
-    email = StringField("email", validators=[Email(message=ERROS['email']),Length(min=10,max=256,message=ERROS['tamanho_email']), 
+    email = StringField("Email", validators=[Email(message=ERROS['email']),Length(min=10,max=256,message=ERROS['tamanho_email']), 
         InputRequired(message=ERROS['requerido']) ])
 
     imagem = FileField('Foto de Perfil', validators=[FileRequired(message=['file_required']),
@@ -39,41 +39,41 @@ class CadastroUsuarioForm(FlaskForm):
 
     cpf = StringField("cpf", validators=[InputRequired(message=ERROS['requerido']),Length(min=11,max=14,message=ERROS['tamanho_cpf'])])
 
-    enviar = SubmitField("enviar")
+    enviar = SubmitField("Enviar")
 
 class LoginUsuarioForm(FlaskForm):
-    nome_usuario = StringField("nome de usuário",validators=[InputRequired(message=ERROS['requerido']),
+    nome_usuario = StringField("Nome de usuário",validators=[InputRequired(message=ERROS['requerido']),
         Length(min=1,max=20,message=ERROS['quant_caracter_usuario']) ])
     senha = PasswordField("Senha",validators=[InputRequired(message=ERROS['requerido']), Length(min=3,max=32,message=ERROS['tamanho_senha'])])
-    lembreme = BooleanField("lembre-me")
-    logar = SubmitField("logar")
+    lembreme = BooleanField("Lembre-me")
+    logar = SubmitField("Logar")
 
 class CadastroCidadeForm(FlaskForm):
-    nome_cidade = StringField("nome da cidade", validators=[InputRequired(message=ERROS['requerido']), Length(max=100,message=ERROS['tamanho_cidade'])])
-    descricao_cidade = TextAreaField("descrição da cidade")
-    favorita = BooleanField("cidade favorita")
-    notificacao = BooleanField("notificações por e-mail")
-    enviar = SubmitField("enviar")
+    nome_cidade = StringField("Nome da cidade", validators=[InputRequired(message=ERROS['requerido']), Length(max=100,message=ERROS['tamanho_cidade'])])
+    descricao_cidade = TextAreaField("Descrição da cidade")
+    favorita = BooleanField("Cidade favorita")
+    notificacao = BooleanField("Notificações por e-mail")
+    enviar = SubmitField("Enviar")
 
 class EdicaoCidadeForm(FlaskForm):
-    notificacao = BooleanField("notificação por e-mail")
-    descricao_cidade = TextAreaField("descrição da cidade")
-    favorita = BooleanField("cidade favorita")
-    editar = SubmitField("editar")
+    descricao_cidade = TextAreaField("Descrição da cidade")
+    notificacao = BooleanField("Notificação por e-mail")
+    favorita = BooleanField("Cidade favorita")
+    editar = SubmitField("Editar")
 
 class AvaliacaoSiteForm(FlaskForm):
     nota = FloatField("Nota de 0 a 10",validators=[InputRequired(message=ERROS['requerido']),
         NumberRange(min=0,max=10,message=ERROS['range_numeros'])])
     comentario = TextAreaField("Comentário sobre o site")
-    avaliar = SubmitField("avaliar site")
+    avaliar = SubmitField("Avaliar site")
     
 class EdicaoUsuarioForm(FlaskForm):
-    nome_completo = StringField("nome completo", validators=[InputRequired(message=ERROS['requerido'])])
+    nome_completo = StringField("Nome completo", validators=[InputRequired(message=ERROS['requerido'])])
 
-    nome_usuario = StringField("nome de usuário", validators=[Length(min=1,max=20,message=ERROS['quant_caracter_usuario']),
+    nome_usuario = StringField("Nome de usuário", validators=[Length(min=1,max=20,message=ERROS['quant_caracter_usuario']),
         InputRequired(message=ERROS['requerido'])])
 
-    email = StringField("email", validators=[Email(message=ERROS['email']),Length(min=10,max=256,message=ERROS['tamanho_email']), 
+    email = StringField("Email", validators=[Email(message=ERROS['email']),Length(min=10,max=256,message=ERROS['tamanho_email']), 
         InputRequired(message=ERROS['requerido']) ],)
 
     imagem = FileField('Foto de Perfil', validators=[FileAllowed(['jpg', 'png','jpeg'],message=ERROS['arquivo_foto']) ])
