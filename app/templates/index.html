@@ -7,6 +7,20 @@
 
 {% block main %}
 <br><br><br><br>
+
+{% with mensagens = get_flashed_messages() %}
+    {% if  mensagens%}
+        {% for mensagem in mensagens %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ mensagem }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
 <div class="jumbotron" style="background-color: #f5f5f0;">
     <h1>Capitais Mundiais</h1>
     <p>Previsão do tempo das principais cidades do mundo</p>
@@ -67,7 +81,7 @@
         {% if avaliacao.comentario|e %}
             <div class="row">
                 <div class="card">
-                    <div class="card-header"><img src= "static/{{ avaliacao.caminho_foto }}" alt="Imagem de Perfil" style="width: 5rem;" > <h4>Usuaŕio: {{avaliacao.nome_usuario}}</h4> </div>
+                    <div class="card-header"><img src= "static/{{ avaliacao.caminho_foto }}" alt="Imagem de Perfil" style="width: 5rem;" > <h4>Usuário: {{avaliacao.nome_usuario}}</h4> </div>
                     <div class="card-content"> <h4>Comentário:</h4> <p>{{avaliacao.comentario}}</p></div>
                 </div>
                 

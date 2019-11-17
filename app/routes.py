@@ -11,7 +11,8 @@ from flask_login import current_user, login_user, login_required, logout_user
 from werkzeug import secure_filename
 from app.models import UsuarioModel, CidadeModel, AvaliacaoSiteModel
 from app.forms import (CadastroUsuarioForm,LoginUsuarioForm,CadastroCidadeForm,
-    EdicaoCidadeForm, AvaliacaoSiteForm,EdicaoUsuarioForm,AlterarSenhaForm)
+    EdicaoCidadeForm, AvaliacaoSiteForm,EdicaoUsuarioForm,AlterarSenhaForm, 
+    PesquisarCidadeForm)
 
 
 #página inicial + tela  de login + cadastro de usuário
@@ -85,12 +86,16 @@ def cadastrar_usuario():
 @login_required
 def editar_usuario():
     form_edit_user = EdicaoUsuarioForm()
-    #simplificando nomes
     
+    #simplificando nomes
     usuario = form_edit_user.nome_usuario
     nome = form_edit_user.nome_completo
     email = form_edit_user.email
     imagem = form_edit_user.imagem
+    
+    usuario.render_kw = {"value": current_user.nome_usuario}
+    nome.render_kw = {"value": current_user.nome_completo}
+    email.render_kw = {"value": current_user.email}
 
     if form_edit_user.validate_on_submit():
         if imagem.data.filename != "":
@@ -182,14 +187,62 @@ def cadastrar_cidade():
             form_cad_city.nome_cidade.errors.append(msg_erro_cidade)
     return render_template('cadastro_city.html',form=form_cad_city)
 
+
 #lista de cidades
 @app.route('/lista_cidades',methods=['get','post'])
 @login_required
 def listar_cidades():
-    cidades = current_user.lista_cidades
-    return render_template('Lista_cidade.html',cidades=cidades)
+    '''
+    itens_request = request.args
+    favorito = itens_request.getlist('favorito')
+    notificavel = itens_request.getlist('notificavel')
+    string_pesquisa = itens_request.getlist('pesquisa')
+    print(favorito)
+    print(notificavel)
+    print(string_pesquisa)
+    '''
+    form = PesquisarCidadeForm()
+    cidades = []
+    if form.validate_on_submit():
+        for cidade in current_user.lista_cidades:
+            if form.nome_cidade.data in cidade.nome_cidade:
+                cidades.append(cidade)
+    else:
+        cidades = current_user.lista_cidades
+    return render_template('Lista_cidade.html',cidades=cidades,form=form)
 
 
+@app.route('/lista_cidades/favoritas',methods=['get','post'])
+@login_required
+def listar_cidades_favoritas():
+    form = PesquisarCidadeForm()
+    cidades = []
+    if form.validate_on_submit():
+        for cidade in current_user.lista_cidades:
+            if form.nome_cidade.data in cidade.nome_cidade:
+                cidades.append(cidade)
+    else:
+        for cidade in current_user.lista_cidades:
+            if cidade.favorito:
+                cidades.append(cidade)
+    return render_template('Lista_cidade.html',cidades=cidades,form=form)
+
+
+@app.route('/lista_cidades/notificavel',methods=['get','post'])
+@login_required
+def listar_cidades_notificavel():
+    form = PesquisarCidadeForm()
+    cidades = []
+    if form.validate_on_submit():
+        for cidade in current_user.lista_cidades:
+            if form.nome_cidade.data in cidade.nome_cidade:
+                cidades.append(cidade)
+    else:
+        for cidade in current_user.lista_cidades:
+            if cidade.notificavel:
+                cidades.append(cidade)
+    return render_template('Lista_cidade.html',cidades=cidades,form=form)
+    
 #deletar cidade
 @app.route('/deletar_cidade/<string:id>',methods=['get','post'])
 @login_required
@@ -281,8 +334,11 @@ def excluir_conta():
 def carregar_perfil():
     return render_template('perfil.html',foto=current_user.caminho_foto)
 
-
-
+#404
+@app.errorhandler(404)
+def page_not_found(e):
+    #flash("Erro 404: A página solicitada não foi implementada. Desculpe pelo inconveniente.")
+    return render_template("erro404.html")
 
 def coletar_objetos_climaticos(nome_cidade:str):
     try:
