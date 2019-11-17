@@ -65,4 +65,15 @@ class AvaliacaoSiteModel(db.Model):
         self.comentario = comentario
         self.caminho_foto = caminho_foto
     
-    
+
+class CidadeDoJson(db.Model):
+    name = db.Column(db.String)
+    id = db.Column(db.Integer,primary_key=True)
+    country = db.Column(db.String)
+    coord = db.Column(db.PickleType)
+
+    def __init__(self,id,name,country,coord):
+        self.id = id
+        self.name = name
+        self.country = country
+        self.coord = coord

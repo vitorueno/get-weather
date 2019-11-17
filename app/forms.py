@@ -3,7 +3,7 @@ from wtforms import (PasswordField, StringField, IntegerField, BooleanField,
      SubmitField,TextAreaField,FloatField,FileField)
 from wtforms.validators import InputRequired, Length, EqualTo, Email,NumberRange
 from flask_uploads import UploadSet, IMAGES
-from flask_wtf.file import FileRequired, FileAllowed
+from flask_wtf.file import FileAllowed
 
 ERROS = {
         'requerido':'Campo obrigatório. Por favor, preencha.',
@@ -33,10 +33,9 @@ class CadastroUsuarioForm(FlaskForm):
     email = StringField("Email", validators=[Email(message=ERROS['email']),Length(min=10,max=256,message=ERROS['tamanho_email']), 
         InputRequired(message=ERROS['requerido']) ])
 
-    imagem = FileField('Foto de Perfil', validators=[FileRequired(message=['file_required']),
-        FileAllowed(['jpg', 'png','jpeg'],message=ERROS['arquivo_foto']) ])
+    imagem = FileField('Foto de Perfil', validators=[FileAllowed(['jpg', 'png','jpeg'],message=ERROS['arquivo_foto']) ])
 
-    cpf = StringField("cpf", validators=[InputRequired(message=ERROS['requerido']),Length(min=11,max=14,message=ERROS['tamanho_cpf'])])
+    cpf = StringField("Cpf", validators=[InputRequired(message=ERROS['requerido']),Length(min=11,max=14,message=ERROS['tamanho_cpf'])])
 
     enviar = SubmitField("Enviar")
 
@@ -93,7 +92,6 @@ class AlterarSenhaForm(FlaskForm):
     editar = SubmitField("Editar Senha")
 
 class PesquisarCidadeForm(FlaskForm):
-    nome_cidade= StringField("Nome da cidade", validators=[InputRequired(message=ERROS['requerido']), 
-                                                           Length(max=100,message=ERROS['tamanho_cidade'])])
+    nome_cidade= StringField("Nome da cidade", validators=[Length(max=100,message=ERROS['tamanho_cidade'])])
 
     pesquisar = SubmitField("Pesquisar cidade")

@@ -14,6 +14,8 @@ from app.forms import (CadastroUsuarioForm,LoginUsuarioForm,CadastroCidadeForm,
     EdicaoCidadeForm, AvaliacaoSiteForm,EdicaoUsuarioForm,AlterarSenhaForm, 
     PesquisarCidadeForm)
 
+import json
+
 
 #página inicial + tela  de login + cadastro de usuário
 @app.route('/',methods=['get','post'])
@@ -43,8 +45,6 @@ def carregar_index():
 def cadastrar_usuario():
     form_cad_user = CadastroUsuarioForm()
     if form_cad_user.validate_on_submit():
-        nome_arquivo = secure_filename(form_cad_user.imagem.data.filename)
-        form_cad_user.imagem.data.save(os.path.join(app.config['UPLOAD_FOLDER'],nome_arquivo))
 
         #padronizar formato do cpf(sem ponto e traço)
         form_cad_user.cpf.data = padronizar_cpf(form_cad_user.cpf.data)
@@ -60,9 +60,16 @@ def cadastrar_usuario():
             if cpf_valido: #verifica se o cpf é válido (regras gorverno)
                 if not usuario_ja_cadastrado: #verifica se o nome de usuário ja foi usado
                     if not email_ja_cadastrado:
-                        novo_usuario = UsuarioModel(form_cad_user.cpf.data,form_cad_user.nome_completo.data,
-                            form_cad_user.nome_usuario.data,form_cad_user.email.data,form_cad_user.senha.data,
-                            "img/"+nome_arquivo)
+                        if form_cad_user.imagem.data.filename != "": 
+                            nome_arquivo = secure_filename(form_cad_user.imagem.data.filename)
+                            form_cad_user.imagem.data.save(os.path.join(app.config['UPLOAD_FOLDER'],nome_arquivo))
+                            novo_usuario = UsuarioModel(form_cad_user.cpf.data,form_cad_user.nome_completo.data,
+                                form_cad_user.nome_usuario.data,form_cad_user.email.data,form_cad_user.senha.data,
+                                "img/"+nome_arquivo)
+                        else:
+                            novo_usuario = UsuarioModel(form_cad_user.cpf.data,form_cad_user.nome_completo.data,
+                                form_cad_user.nome_usuario.data,form_cad_user.email.data,form_cad_user.senha.data,
+                                "img/"+'ovo.jpg')
                         db.session.add(novo_usuario)
                         db.session.commit()
                         return redirect('/home')
@@ -205,7 +212,7 @@ def listar_cidades():
     cidades = []
     if form.validate_on_submit():
         for cidade in current_user.lista_cidades:
-            if form.nome_cidade.data in cidade.nome_cidade:
+            if form.nome_cidade.data.capitalize() in cidade.nome_cidade.capitalize():
                 cidades.append(cidade)
     else:
         cidades = current_user.lista_cidades
@@ -219,7 +226,7 @@ def listar_cidades_favoritas():
     cidades = []
     if form.validate_on_submit():
         for cidade in current_user.lista_cidades:
-            if form.nome_cidade.data in cidade.nome_cidade:
+            if form.nome_cidade.data.capitalize() in cidade.nome_cidade.capitalize():
                 cidades.append(cidade)
     else:
         for cidade in current_user.lista_cidades:
@@ -235,7 +242,7 @@ def listar_cidades_notificavel():
     cidades = []
     if form.validate_on_submit():
         for cidade in current_user.lista_cidades:
-            if form.nome_cidade.data in cidade.nome_cidade:
+            if form.nome_cidade.data.capitalize() in cidade.nome_cidade.capitalize():
                 cidades.append(cidade)
     else:
         for cidade in current_user.lista_cidades:
@@ -413,3 +420,10 @@ def validar_cpf(cpf):
     if digito1 == digitos_ver[0] and digito2 == digitos_ver[1]:
         return True
     return False
+
+    class Cidade():
+        def __init__(self, name):
+            self.name = name
+            
+        def __repr__(self):
+            return f'<Cidade {self.name}>'
