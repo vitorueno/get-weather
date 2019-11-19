@@ -7,6 +7,8 @@
 <h1>Avaliar Site</h1>
 <form action="/avaliacao_form" method="post">
     <div class="container">
+    {{mostrar_erro_field(form.nota)}}
+    {{mostrar_erro_field(form.comentario)}}
     {{ wtf.quick_form(form) }}
     </div>
 </form>

@@ -5,6 +5,15 @@
     <div class="container">
     <fieldset>
     <form action="/cadastrar_usuario" method="post" enctype="multipart/form-data">
+        <h1>Cadastro de Usuário</h1>
+        {{ mostrar_erro_lista(erros) }}
+        {{mostrar_erro_field(form.nome_completo)}}
+        {{mostrar_erro_field(form.nome_usuario)}}
+        {{mostrar_erro_field(form.cpf)}}
+        {{mostrar_erro_field(form.email)}}
+        {{mostrar_erro_field(form.senha)}}
+        {{mostrar_erro_field(form.confirmacao_senha)}}
+        {{mostrar_erro_field(form.imagem)}}
         {{wtf.quick_form(form)}}
     </form>
     </fieldset>

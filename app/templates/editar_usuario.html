@@ -4,6 +4,11 @@
     <div class="container">
         <h1>Editar Usuário</h1>
         <form class="form" action="/editar_usuario" method="post" enctype="multipart/form-data">
+            {{ mostrar_erro_lista(erros) }}
+            {{ mostrar_erro_field(form.nome_completo) }}
+            {{ mostrar_erro_field(form.nome_usuario) }}
+            {{ mostrar_erro_field(form.email) }}
+            {{ mostrar_erro_field(form.imagem) }}
             {{ wtf.quick_form(form) }}
         </form>
         {% endblock main %}

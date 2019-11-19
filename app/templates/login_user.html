@@ -6,9 +6,10 @@
     <h1>Logar</h1>
     
     <form action="logar_usuario" method="POST">
-        {% if erro_login %}
-            <div class="alert alert-danger alert-dismissible">{{erro_login}}</li>
-        {% endif %} 
+        {{ mostrar_erro_lista(erros) }}
+        {{ mostrar_erro_field(form.nome_usuario) }}
+        {{ mostrar_erro_field(form.senha) }}
+        {{ mostrar_erro_field(form.lembreme) }}
         {{wtf.quick_form(form)}}
     </form>
     

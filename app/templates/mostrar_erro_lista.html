@@ -1,0 +1,25 @@
+{% macro mostrar_erro_field(field) %}
+    {% if field.erros %}
+        {% for erro in field.errors %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{erro}}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endmacro %}
+
+
+{% macro mostrar_erro_lista(erros) %}
+    {% for erro in erros %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{erro}}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    {% endfor %}
+{% endmacro %}
+

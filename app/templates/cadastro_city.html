@@ -4,12 +4,30 @@
 {% block main %}
 <br><br><br>
 <div class="container">
+
 <h2>Cadastrar Cidade</h2>
-<div class="col-md-12 ">
 <form action="cadastrar_cidade" class="form-inlin justify-content-center" method="POST">
-    {{ wtf.quick_form(form) }}
-    
+    {{ mostrar_erro_lista(erros) }}
+    {{mostrar_erro_field(form.nome_cidade)}}
+    {{mostrar_erro_field(form.descricao_cidade)}}
+    {{mostrar_erro_field(form.favorita)}}
+    {{mostrar_erro_field(form.notificacao)}}
+
+    <div class="form-group">
+        {{form.nome_cidade.label(class="form-control-label", for="id_datalist")}}
+        {{form.nome_cidade(list="id_datalist")}}
+        <datalist id="id_datalist">
+            {% for cidade in lista_cidades %}
+            <option value={{ cidade.name }}>
+            {% endfor %}
+        </datalist>
+    </div>
+
+    {{ form_field(form.descricao_cidade) }}
+    {{ form_field(form.favorita) }}
+    {{ form_field(form.notificacao) }}
+    {{ form_field(form.enviar) }}
+
 </form>
-</div>
 </div>
 {% endblock main %}

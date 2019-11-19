@@ -25,18 +25,18 @@ class CadastroUsuarioForm(FlaskForm):
     nome_usuario = StringField("Nome de usuário", validators=[Length(min=1,max=20,message=ERROS['quant_caracter_usuario']),
         InputRequired(message=ERROS['requerido'])])
 
-    senha = PasswordField("Senha", validators=[InputRequired(message=ERROS['requerido']),Length(min=3,max=32,message=ERROS['tamanho_senha'])])
-
-    confirmacao_senha = PasswordField("Digite a Senha novamente", validators=[InputRequired(message=ERROS['requerido']),
-        Length(min=3,max=32,message=ERROS['tamanho_senha']), EqualTo('senha',message=ERROS['senhas_iguais'])])
+    cpf = StringField("Cpf", validators=[InputRequired(message=ERROS['requerido']),Length(min=11,max=14,message=ERROS['tamanho_cpf'])])
 
     email = StringField("Email", validators=[Email(message=ERROS['email']),Length(min=10,max=256,message=ERROS['tamanho_email']), 
         InputRequired(message=ERROS['requerido']) ])
 
+    senha = PasswordField("Senha", validators=[InputRequired(message=ERROS['requerido']),Length(min=3,max=32,message=ERROS['tamanho_senha'])])
+
+    confirmacao_senha = PasswordField("Digite a Senha novamente", validators=[InputRequired(message=ERROS['requerido']),
+        Length(min=3,max=32,message=ERROS['tamanho_senha']), EqualTo('senha',message=ERROS['senhas_iguais'])])
+    
     imagem = FileField('Foto de Perfil', validators=[FileAllowed(['jpg', 'png','jpeg'],message=ERROS['arquivo_foto']) ])
-
-    cpf = StringField("Cpf", validators=[InputRequired(message=ERROS['requerido']),Length(min=11,max=14,message=ERROS['tamanho_cpf'])])
-
+    
     enviar = SubmitField("Enviar")
 
 class LoginUsuarioForm(FlaskForm):
@@ -55,8 +55,8 @@ class CadastroCidadeForm(FlaskForm):
 
 class EdicaoCidadeForm(FlaskForm):
     descricao_cidade = TextAreaField("Descrição da cidade")
-    notificacao = BooleanField("Notificação por e-mail")
     favorita = BooleanField("Cidade favorita")
+    notificacao = BooleanField("Notificação por e-mail")
     editar = SubmitField("Editar")
 
 class AvaliacaoSiteForm(FlaskForm):

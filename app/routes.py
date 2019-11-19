@@ -9,7 +9,7 @@ from app import app, db,login_manager,api_clima
 from flask import render_template, redirect,request, flash
 from flask_login import current_user, login_user, login_required, logout_user
 from werkzeug import secure_filename
-from app.models import UsuarioModel, CidadeModel, AvaliacaoSiteModel
+from app.models import UsuarioModel, CidadeModel, AvaliacaoSiteModel, CidadeDoJson
 from app.forms import (CadastroUsuarioForm,LoginUsuarioForm,CadastroCidadeForm,
     EdicaoCidadeForm, AvaliacaoSiteForm,EdicaoUsuarioForm,AlterarSenhaForm, 
     PesquisarCidadeForm)
@@ -44,8 +44,10 @@ def carregar_index():
 @app.route('/cadastrar_usuario',methods=['get','post'])
 def cadastrar_usuario():
     form_cad_user = CadastroUsuarioForm()
-    if form_cad_user.validate_on_submit():
 
+    erros = []
+    if form_cad_user.validate_on_submit():
+        
         #padronizar formato do cpf(sem ponto e traço)
         form_cad_user.cpf.data = padronizar_cpf(form_cad_user.cpf.data)
 
@@ -75,25 +77,25 @@ def cadastrar_usuario():
                         return redirect('/home')
                     else:
                         #email ja foi usado, mostrará um erro
-                        form_cad_user.email.errors.append('Email já cadastrado. Por favor tente outro')
+                        erros.append('Email já cadastrado. Por favor tente outro')
                 else:
                     #nome de usuário ja foi usado, mostrará um erro
-                    form_cad_user.nome_usuario.errors.append('Nome de usuário já cadastrado. Por favor tente outro')
+                   erros.append('Nome de usuário já cadastrado. Por favor tente outro')
             else:
                 #cpf já foi usado, logo mostrará um erro
-                form_cad_user.cpf.errors.append('CPF inválido. Por favor, informe outro.') 
+                erros.append('CPF inválido. Por favor, informe outro.') 
         else:
             #se cpf já estiver cadastrado
-            form_cad_user.cpf.errors.append('CPF já cadastrado. Por favor, tente outro.') 
+            erros.append('CPF já cadastrado. Por favor, tente outro.') 
             
-    return render_template('cadastro_user.html',form=form_cad_user)
+    return render_template('cadastro_user.html',form=form_cad_user,erros=erros)
 
 #editar usuário
 @app.route('/editar_usuario',methods=['get','post'])
 @login_required
 def editar_usuario():
     form_edit_user = EdicaoUsuarioForm()
-    
+    erros = []
     #simplificando nomes
     usuario = form_edit_user.nome_usuario
     nome = form_edit_user.nome_completo
@@ -111,37 +113,53 @@ def editar_usuario():
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'],arquivo_atual))
             imagem.data.save(os.path.join(app.config['UPLOAD_FOLDER'],nome_arquivo))
             current_user.caminho_foto = "img/" + nome_arquivo
-        current_user.nome_completo = nome.data
-        current_user.usuario = usuario.data
-        current_user.email = email.data
         
-        db.session.merge(current_user)
-        db.session.commit()
+        if  usuario.data != current_user.nome_usuario:
+            usuario_existente = UsuarioModel.query.filter_by(nome_usuario=usuario.data).first()
+        else:
+            usuario_existente = None
+            
+        if  email.data != current_user.email:
+            email_existente = UsuarioModel.query.filter_by(email=email.data).first()
+        else:
+            email_existente = None
+        
+        if usuario_existente is None:
+            if email_existente is None:
+                current_user.nome_completo = nome.data
+                current_user.usuario = usuario.data
+                current_user.email = email.data
+                db.session.merge(current_user)
+                db.session.commit()
+                return redirect('/perfil')
+            else:
+                erros.append("Email já em uso. Tente outro, por favor.")
+        else:
+            erros.append("Nome de usuário já em uso. Tente outro, por favor.")
 
-        return redirect('/perfil')
     
-    return render_template('editar_usuario.html',form=form_edit_user)
+    return render_template('editar_usuario.html',form=form_edit_user,erros=erros)
 
 @app.route('/alterar_senha',methods=['get','post'])
 @login_required
 def alterar_senha():
     form = AlterarSenhaForm()
+    erros = []
     if form.validate_on_submit():
-        if current_user.checar_senha(form_alterar_senha.senha_atual.data):
-            current_user.set_senha_hash(form_alterar_senha.nova_senha.data)
+        if current_user.checar_senha(form.senha_atual.data):
+            current_user.set_senha_hash(form.nova_senha.data)
             db.session.merge(current_user)
             db.session.commit()
             return redirect('/perfil')
         else:
-            erro_senha = 'Senha incorreta, por favor tente novamente.'
-            form_alterar_senha.senha_atual.data.errors.append(erro_senha)
+            erros.append('Senha incorreta, por favor tente novamente.')
         
-    return render_template('alterar_senha.html',form=form)
+    return render_template('alterar_senha.html',form=form,erros=erros)
 
 #logar
 @app.route('/logar_usuario',methods=['get','post'])
 def logar_usuario():
-    erro_de_login = None
+    erros = []
     form_login = LoginUsuarioForm()
     if form_login.validate_on_submit():
         usuario = UsuarioModel.query.filter_by(nome_usuario=form_login.nome_usuario.data).first()
@@ -151,10 +169,10 @@ def logar_usuario():
                 login_user(usuario)
                 return redirect('/home')
             else:
-                erro_de_login = 'Usuário e/ou senha inválido. Por favor, digite outro.'
+                erros.append('Usuário e/ou senha inválido. Por favor, digite outro.')
         else:
-            erro_de_login = 'Usuário e/ou senha inválido. Por favor, digite outro.'
-    return render_template('login_user.html',form=form_login,erro_login=erro_de_login)
+            erros.append('Usuário e/ou senha inválido. Por favor, digite outro.')
+    return render_template('login_user.html',form=form_login,erros=erros)
 
 #logout usuário
 @app.route('/deslogar_usuario',methods=['get','post'])
@@ -168,6 +186,8 @@ def deslogar_usuario():
 @login_required
 def cadastrar_cidade():
     form_cad_city = CadastroCidadeForm()
+    cidades_possiveis = CidadeDoJson.query.all()
+    
     if form_cad_city.validate_on_submit():
         
         while True:
@@ -178,21 +198,30 @@ def cadastrar_cidade():
 
         cidade_valida = coletar_objetos_climaticos(form_cad_city.nome_cidade.data)
 
-        if cidade_valida is not None:
-            nova_cidade =  CidadeModel(str(id_gerado),form_cad_city.nome_cidade.data,
-                current_user.cpf_usuario,form_cad_city.favorita.data,form_cad_city.notificacao.data,
-                form_cad_city.descricao_cidade.data)
-
-            current_user.lista_cidades.append(nova_cidade)
-            db.session.merge(current_user)
-            db.session.add(nova_cidade)
-            db.session.commit()
-            return redirect('/lista_cidades')
-        else:
+        if cidade_valida is not None: #cidade válida
+    
+            cidade_ja_cadastrada = CidadeModel.query.filter_by(nome_cidade=form_cad_city.nome_cidade.data,
+                                                               cpf_usuario=current_user.cpf_usuario).first()
+            if cidade_ja_cadastrada is not None:
+                msg_ja_cad = 'Cidade já cadastrada, Por favor tente outro nome.' 
+                list(form_cad_city.nome_cidade.errors).append(msg_ja_cad)
+                
+            else:
+                nova_cidade =  CidadeModel(str(id_gerado),form_cad_city.nome_cidade.data,
+                    current_user.cpf_usuario,form_cad_city.favorita.data,form_cad_city.notificacao.data,
+                    form_cad_city.descricao_cidade.data)
+                current_user.lista_cidades.append(nova_cidade)
+                db.session.merge(current_user)
+                db.session.add(nova_cidade)
+                db.session.commit()
+                return redirect('/lista_cidades')
+            
+        else: #cidade não válida
             nome_cidade = form_cad_city.nome_cidade.data
             msg_erro_cidade = f'{nome_cidade} não é um nome de cidade válido para a API de clima. Por favor tente outro.' 
-            form_cad_city.nome_cidade.errors.append(msg_erro_cidade)
-    return render_template('cadastro_city.html',form=form_cad_city)
+            list(form_cad_city.nome_cidade.errors).append(msg_erro_cidade)
+            
+    return render_template('cadastro_city.html',form=form_cad_city,lista_cidades=cidades_possiveis)
 
 
 #lista de cidades
@@ -266,8 +295,13 @@ def deletar_cidade(id):
 def editar_cidade(id):
     cidade = CidadeModel.query.get_or_404(id)
     form_edicao_city = EdicaoCidadeForm()
-    if form_edicao_city.validate_on_submit():
+    form_edicao_city.descricao_cidade.render_kw = {"placeholder": cidade.descricao}
+    if cidade.notificavel:
+        form_edicao_city.notificacao.render_kw = {"checked":"checked"}
+    if cidade.favorito:
+        form_edicao_city.favorita.render_kw = {"checked":"checked"}
 
+    if form_edicao_city.validate_on_submit():
         #condições
         descr_diferente = form_edicao_city.descricao_cidade.data != cidade.descricao
         fav_diferente = form_edicao_city.favorita != cidade.favorito
@@ -330,10 +364,12 @@ def excluir_conta():
     for cidade in current_user.lista_cidades:
         db.session.delete(cidade)
     arquivo_atual = os.path.split(current_user.caminho_foto)[1]
-    os.remove(os.path.join(app.config['UPLOAD_FOLDER'],arquivo_atual))
+    if arquivo_atual != "img/"+"ovo.jpg":
+        os.remove(os.path.join(app.config['UPLOAD_FOLDER'],arquivo_atual))
     db.session.delete(current_user)
     db.session.commit()
     return redirect('/home')
+
 
 #perfil
 @app.route('/perfil',methods=['get','post'])
@@ -347,15 +383,18 @@ def page_not_found(e):
     #flash("Erro 404: A página solicitada não foi implementada. Desculpe pelo inconveniente.")
     return render_template("erro404.html")
 
+def verificar_existencia_cidade(nome_cidade:str):
+    cidade_existente = CidadeDoJson.query.filter_by(name=nome_cidade).first() 
+    return cidade_existente 
+
 def coletar_objetos_climaticos(nome_cidade:str):
-    try:
+    cidade = verificar_existencia_cidade(nome_cidade)
+    if cidade is not None:
         objeto_cidade = api_clima.weather_at_place(nome_cidade.capitalize())
         objeto_previsao = api_clima.three_hours_forecast(nome_cidade.capitalize())
-    except NotFoundError:
-        print("Cidade não encontrada: ",nome_cidade)
-        return None
+        return objeto_cidade,objeto_previsao
     else:
-        return (objeto_cidade,objeto_previsao)
+        return None
 
 
 def calcular_media_notas(lista_notas:list):
@@ -381,49 +420,45 @@ def padronizar_cpf(cpf):
     return cpf
 
 def validar_cpf(cpf):
-    padronizar_cpf(cpf)
+    try:
+        padronizar_cpf(cpf)
 
-    #segmenta o cpf em duas partes
-    cpf_sem_verific = cpf[:9]
-    digitos_ver = cpf[9:]
+        #segmenta o cpf em duas partes
+        cpf_sem_verific = cpf[:9]
+        digitos_ver = cpf[9:]
 
-    #geração do suposto primeiro digito verificador 
-    soma1 = 0
-    contagem1 = 10
-    for numero in cpf_sem_verific:
-        soma1 += int(numero) * contagem1
-        contagem1 -= 1
+        #geração do suposto primeiro digito verificador 
+        soma1 = 0
+        contagem1 = 10
+        for numero in cpf_sem_verific:
+            soma1 += int(numero) * contagem1
+            contagem1 -= 1
 
-    resto_soma1 = soma1%11
-    if resto_soma1 < 2:
-        digito1 = 0
-    else:
-        digito1 = 11 - resto_soma1
-    
-    digito1 = str(digito1)
-    segundo_passo = cpf_sem_verific + digito1
+        resto_soma1 = soma1%11
+        if resto_soma1 < 2:
+            digito1 = 0
+        else:
+            digito1 = 11 - resto_soma1
+        
+        digito1 = str(digito1)
+        segundo_passo = cpf_sem_verific + digito1
 
-    soma2 = 0
-    contagem2 = 11
-    for numero in segundo_passo:
-        soma2 += int(numero) * contagem2
-        contagem2 -= 1
-    
-    resto_soma2 = soma2%11
-    if resto_soma2 < 2:
-        digito2 = 0
-    else:
-        digito2 = 11 - resto_soma2
-    
-    digito2 = str(digito2)
-    
-    if digito1 == digitos_ver[0] and digito2 == digitos_ver[1]:
-        return True
-    return False
-
-    class Cidade():
-        def __init__(self, name):
-            self.name = name
-            
-        def __repr__(self):
-            return f'<Cidade {self.name}>'
+        soma2 = 0
+        contagem2 = 11
+        for numero in segundo_passo:
+            soma2 += int(numero) * contagem2
+            contagem2 -= 1
+        
+        resto_soma2 = soma2%11
+        if resto_soma2 < 2:
+            digito2 = 0
+        else:
+            digito2 = 11 - resto_soma2
+        
+        digito2 = str(digito2)
+        
+        if digito1 == digitos_ver[0] and digito2 == digitos_ver[1]:
+            return True
+        return False
+    except:
+        return False

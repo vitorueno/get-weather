@@ -4,6 +4,10 @@
     <br><br><br>
     <div class="container">
         <h1>Alterar senha</h1>
+        {{ mostrar_erro_lista(erros) }}
+        {{ mostrar_erro_field(form.senha_atual) }}
+        {{ mostrar_erro_field(form.nova_senha) }}
+        {{ mostrar_erro_field(form.confirm_nova_senha) }}
         {{ wtf.quick_form(form) }}
     </div>
     <br>

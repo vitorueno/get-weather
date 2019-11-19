@@ -6,6 +6,9 @@
 <div class="container">
 <h2>Editar Cidade: {{cidade.nome_cidade}}</h2>
 <form action="/editar_cidade/{{ cidade.id }}" method="POST">
+    {{mostrar_erro_field(form.descricao_cidade)}}
+    {{mostrar_erro_field(form.favorita)}}
+    {{mostrar_erro_field(form.notificacao)}}
     {{wtf.quick_form(form)}}
 </form>
     <br>
