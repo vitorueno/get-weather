@@ -29,11 +29,11 @@ class Config:
         UPLOAD_FOLDER = '/home/aluno/Downloads/get-weather/app/static/img'
         
     config_email = Email()
-    MAIL_USERNAME = config_email.EMAIl
+    MAIL_USERNAME = config_email.EMAIL
     MAIL_PASSWORD = config_email.SENHA
     MAIL_SERVER = config_email.HOST
     MAIL_PORT = config_email.PORTA
-    MAIL_DEFAULT_SENDER = config_email.EMAIl
+    MAIL_DEFAULT_SENDER = config_email.EMAIL
     MAIL_USE_TLS = config_email.TLS 
     MAIL_USE_SSL = config_email.SSL
     

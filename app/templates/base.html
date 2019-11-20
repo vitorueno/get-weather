@@ -7,6 +7,7 @@
 {% block styles %}
   {{super()}}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <link href="https://fonts.googleapis.com/css?family=Baloo+Paaji&display=swap" rel="stylesheet">
 {% endblock styles %}
 
 
@@ -31,7 +32,7 @@
     <header>
     
     <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-        <img src="{{ url_for('static', filename='') }}" alt="">
+
         <img src="{{ url_for('static', filename='img/icone.png') }}" height="40px" width="40px">
         <a class="navbar-brand" href="{{ url_for('carregar_index') }}" style="margin-left:10px;">Get Weather</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +55,11 @@
             <h6 class="nav-item text-white text-center" style="padding-right:1rem;">Olá, {{current_user.nome_completo}}</h6>
             <a class="nav-link btn btn-primary" href="{{ url_for('deslogar_usuario') }}">Sair</a>
             {% else %}
-                <a class="btn btn-primary btn-md" href="{{ url_for('logar_usuario') }}">Entrar</a>
+            
+            
+                <a class=" nav-item btn btn-primary btn-md my-2 my-md-0" href="{{ url_for('logar_usuario') }}" >Entrar</a>
+            
+            
             {% endif %}
         </div>
     </nav>

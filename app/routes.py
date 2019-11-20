@@ -23,6 +23,7 @@ from app.forms import (CadastroUsuarioForm,LoginUsuarioForm,CadastroCidadeForm,
 @app.route('/',methods=['get','post'])
 @app.route('/home',methods=['get','post'])
 def carregar_index():
+    fuso_horario = tzlocal.get_localzone()
     #para testar o envio diário de emails definimos que serão enviados as 10 ou 11 da manhã
     #quando os minutos forem multiplos de 5, assim que o usuário entrar na rota de home.
     horario = datetime.datetime.now().time()
@@ -38,15 +39,7 @@ def carregar_index():
         comentarios.append(avaliacao.comentario)
     media = calcular_media_notas(notas)
 
-    #Conteúdo da página inicial
-    cidades=['Berlin','Tokyo','New York','Washington','Brasilia','Moscow']
-    climas = []
-    for cidade in cidades:
-        objeto_clima = coletar_objetos_climaticos(cidade)[0]
-        clima_atual = objeto_clima.get_weather()
-        climas.append(clima_atual)
-
-    return render_template('index.html',climas=climas,media=media,comentarios=comentarios,avaliacoes=avaliacoes)
+    return render_template('index.html',media=media,comentarios=comentarios,avaliacoes=avaliacoes,fuso=fuso_horario)
 
 #cadastrar usuário isolado
 @app.route('/cadastrar_usuario',methods=['get','post'])
