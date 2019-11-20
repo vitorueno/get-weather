@@ -29,6 +29,8 @@ planejamento e execução de um site CRUD (Create, Read, Update, Delete).</p>
     <li>uuid</li>
     <li>tzlocal</li>
     <li>pytz</li>
+    <li>flask_mail</li>
+    <li>flask_uploads</li>
 </ul>
 
 my twitter:
