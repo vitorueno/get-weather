@@ -4,23 +4,31 @@ from uuid import uuid4
 import tzlocal
 import pytz
 import datetime
+import json
 from pyowm.exceptions.api_response_error import NotFoundError
-from app import app, db,login_manager,api_clima
-from flask import render_template, redirect,request, flash
+from app import app, db,login_manager,api_clima, mail
+from flask import render_template, redirect,request, flash,url_for
 from flask_login import current_user, login_user, login_required, logout_user
+from flask_mail import Message
 from werkzeug import secure_filename
-from app.models import UsuarioModel, CidadeModel, AvaliacaoSiteModel, CidadeDoJson
+from app.models import UsuarioModel, CidadeModel, AvaliacaoSiteModel
 from app.forms import (CadastroUsuarioForm,LoginUsuarioForm,CadastroCidadeForm,
     EdicaoCidadeForm, AvaliacaoSiteForm,EdicaoUsuarioForm,AlterarSenhaForm, 
     PesquisarCidadeForm)
 
-import json
+
 
 
 #página inicial + tela  de login + cadastro de usuário
 @app.route('/',methods=['get','post'])
 @app.route('/home',methods=['get','post'])
 def carregar_index():
+    #para testar o envio diário de emails definimos que serão enviados as 10 ou 11 da manhã
+    #quando os minutos forem multiplos de 5, assim que o usuário entrar na rota de home.
+    horario = datetime.datetime.now().time()
+    if (horario.hour == 11 or horario.hour == 10) and (horario.minute % 5 == 0):
+        enviar_email('todos')
+        
     #avaliação do site
     avaliacoes = AvaliacaoSiteModel.query.all()
     notas = []
@@ -72,9 +80,11 @@ def cadastrar_usuario():
                             novo_usuario = UsuarioModel(form_cad_user.cpf.data,form_cad_user.nome_completo.data,
                                 form_cad_user.nome_usuario.data,form_cad_user.email.data,form_cad_user.senha.data,
                                 "img/"+'ovo.jpg')
+                        
                         db.session.add(novo_usuario)
                         db.session.commit()
-                        return redirect('/home')
+                        flash(f'Conta cadastrada com sucesso',category="sucesso")
+                        return redirect('/logar_usuario')
                     else:
                         #email ja foi usado, mostrará um erro
                         erros.append('Email já cadastrado. Por favor tente outro')
@@ -131,6 +141,7 @@ def editar_usuario():
                 current_user.email = email.data
                 db.session.merge(current_user)
                 db.session.commit()
+                flash(f'Alterações na conta realizadas com sucesso',category="sucesso")
                 return redirect('/perfil')
             else:
                 erros.append("Email já em uso. Tente outro, por favor.")
@@ -150,6 +161,7 @@ def alterar_senha():
             current_user.set_senha_hash(form.nova_senha.data)
             db.session.merge(current_user)
             db.session.commit()
+            flash(f'Senha alterada com sucesso',category="sucesso")
             return redirect('/perfil')
         else:
             erros.append('Senha incorreta, por favor tente novamente.')
@@ -167,6 +179,7 @@ def logar_usuario():
             verificacao_senha = usuario.checar_senha(form_login.senha.data)
             if verificacao_senha:
                 login_user(usuario)
+                flash(f'Você foi logado com sucesso {current_user.nome_completo}',category="sucesso")
                 return redirect('/home')
             else:
                 erros.append('Usuário e/ou senha inválido. Por favor, digite outro.')
@@ -185,9 +198,9 @@ def deslogar_usuario():
 @app.route('/cadastrar_cidade',methods=['get','post'])
 @login_required
 def cadastrar_cidade():
+    erros = []
     form_cad_city = CadastroCidadeForm()
-    cidades_possiveis = CidadeDoJson.query.all()
-    
+            
     if form_cad_city.validate_on_submit():
         
         while True:
@@ -204,7 +217,7 @@ def cadastrar_cidade():
                                                                cpf_usuario=current_user.cpf_usuario).first()
             if cidade_ja_cadastrada is not None:
                 msg_ja_cad = 'Cidade já cadastrada, Por favor tente outro nome.' 
-                list(form_cad_city.nome_cidade.errors).append(msg_ja_cad)
+                erros.append(msg_ja_cad)
                 
             else:
                 nova_cidade =  CidadeModel(str(id_gerado),form_cad_city.nome_cidade.data,
@@ -214,70 +227,48 @@ def cadastrar_cidade():
                 db.session.merge(current_user)
                 db.session.add(nova_cidade)
                 db.session.commit()
+                flash(f'A cidade {nova_cidade.nome_cidade} foi adicionada com sucesso',category="sucesso")
                 return redirect('/lista_cidades')
             
         else: #cidade não válida
             nome_cidade = form_cad_city.nome_cidade.data
-            msg_erro_cidade = f'{nome_cidade} não é um nome de cidade válido para a API de clima. Por favor tente outro.' 
-            list(form_cad_city.nome_cidade.errors).append(msg_erro_cidade)
+            erros.append(f'{nome_cidade} não é um nome de cidade válido para a API de clima. Por favor tente outro.') 
             
-    return render_template('cadastro_city.html',form=form_cad_city,lista_cidades=cidades_possiveis)
+    return render_template('cadastro_city.html',form=form_cad_city,erros=erros)
 
 
 #lista de cidades
 @app.route('/lista_cidades',methods=['get','post'])
+@app.route('/lista_cidades/<favoritas>/<notificaveis>',methods=['get','post'])
 @login_required
-def listar_cidades():
-    '''
-    itens_request = request.args
-    favorito = itens_request.getlist('favorito')
-    notificavel = itens_request.getlist('notificavel')
-    string_pesquisa = itens_request.getlist('pesquisa')
-    print(favorito)
-    print(notificavel)
-    print(string_pesquisa)
-    '''
+def listar_cidades(favoritas='False',notificaveis='False'):
     form = PesquisarCidadeForm()
     cidades = []
     if form.validate_on_submit():
         for cidade in current_user.lista_cidades:
-            if form.nome_cidade.data.capitalize() in cidade.nome_cidade.capitalize():
+            if form.nome_cidade.data.lower() in cidade.nome_cidade.lower():
                 cidades.append(cidade)
     else:
-        cidades = current_user.lista_cidades
+        if favoritas == 'True' and notificaveis == 'False':
+            for cidade_pra_lista in current_user.lista_cidades:
+                if cidade_pra_lista.favorito:
+                    cidades.append(cidade_pra_lista)
+                    
+        elif notificaveis == 'True' and favoritas == 'False':
+            for cidade_pra_lista in current_user.lista_cidades:
+                if cidade_pra_lista.notificavel:
+                    cidades.append(cidade_pra_lista)
+                    
+        elif favoritas == 'True' and notificaveis == 'True':
+            for cidade_pra_lista in current_user.lista_cidades:
+                if cidade_pra_lista.notificavel and cidade_pra_lista.favorito:
+                    cidades.append(cidade_pra_lista)
+                    
+        elif favoritas == 'False' and notificaveis == 'False':
+            cidades = current_user.lista_cidades
+    
     return render_template('Lista_cidade.html',cidades=cidades,form=form)
 
-
-@app.route('/lista_cidades/favoritas',methods=['get','post'])
-@login_required
-def listar_cidades_favoritas():
-    form = PesquisarCidadeForm()
-    cidades = []
-    if form.validate_on_submit():
-        for cidade in current_user.lista_cidades:
-            if form.nome_cidade.data.capitalize() in cidade.nome_cidade.capitalize():
-                cidades.append(cidade)
-    else:
-        for cidade in current_user.lista_cidades:
-            if cidade.favorito:
-                cidades.append(cidade)
-    return render_template('Lista_cidade.html',cidades=cidades,form=form)
-
-
-@app.route('/lista_cidades/notificavel',methods=['get','post'])
-@login_required
-def listar_cidades_notificavel():
-    form = PesquisarCidadeForm()
-    cidades = []
-    if form.validate_on_submit():
-        for cidade in current_user.lista_cidades:
-            if form.nome_cidade.data.capitalize() in cidade.nome_cidade.capitalize():
-                cidades.append(cidade)
-    else:
-        for cidade in current_user.lista_cidades:
-            if cidade.notificavel:
-                cidades.append(cidade)
-    return render_template('Lista_cidade.html',cidades=cidades,form=form)
     
 #deletar cidade
 @app.route('/deletar_cidade/<string:id>',methods=['get','post'])
@@ -285,8 +276,10 @@ def listar_cidades_notificavel():
 def deletar_cidade(id):
     cidade = CidadeModel.query.get_or_404(id)
     if cidade is not None:
+        nome_cidade = cidade.nome_cidade
         db.session.delete(cidade)
         db.session.commit()
+        flash(f'Cidade {nome_cidade} deletada com sucesso',category="sucesso")
         return redirect('/lista_cidades') 
 
 #editar cidade
@@ -315,6 +308,7 @@ def editar_cidade(id):
 
         db.session.merge(cidade)
         db.session.commit()
+        flash(f'Cidade {cidade.nome_cidade} editada com sucesso',category="sucesso")
         return redirect('/lista_cidades') 
     return render_template('editar_city.html',form=form_edicao_city,cidade=cidade)
 
@@ -350,6 +344,7 @@ def avaliar_site():
             datetime.datetime.now(tz=pytz.utc),form_avaliacao.comentario.data,current_user.caminho_foto)
         db.session.add(nova_avaliacao)
         db.session.commit()
+        flash(f'Avaliação efetuada com sucesso',category="sucesso")
         return redirect('/home')
     return render_template('avaliacao.html',form=form_avaliacao)
 
@@ -363,11 +358,22 @@ def load_user(cpf_usuario):
 def excluir_conta():
     for cidade in current_user.lista_cidades:
         db.session.delete(cidade)
+    
+    avaliacao = AvaliacaoSiteModel.query.filter_by(cpf_usuario=current_user.cpf_usuario).first()
+    if avaliacao is not None:
+        db.session.delete(avaliacao)
+        
     arquivo_atual = os.path.split(current_user.caminho_foto)[1]
-    if arquivo_atual != "img/"+"ovo.jpg":
+    
+    foto_path_iguais = UsuarioModel.query.filter_by(caminho_foto=current_user.caminho_foto).all()
+    if len(foto_path_iguais) < 2 and current_user.caminho_foto != 'img/ovo.jpg': 
         os.remove(os.path.join(app.config['UPLOAD_FOLDER'],arquivo_atual))
+    
     db.session.delete(current_user)
     db.session.commit()
+    
+    flash(f'Conta excluída com sucesso',category="sucesso")
+    logout_user()
     return redirect('/home')
 
 
@@ -377,6 +383,27 @@ def excluir_conta():
 def carregar_perfil():
     return render_template('perfil.html',foto=current_user.caminho_foto)
 
+@app.route('/cancelar_notificacao/<cpf_usuario>/<id>',methods=['get','post'])
+def cancelar_notificacao(cpf_usuario,id):
+    usuario = UsuarioModel.query.get_or_404(cpf_usuario)
+    if id != 'todos':
+        cidade = CidadeModel.query.get_or_404(id)
+        if cidade.notificavel:
+            cidade.notificavel = False
+            db.session.merge(cidade)
+            db.session.commit()
+            flash(f'Notificação da cidade {cidade.nome_cidade} removida com sucesso',category="sucesso")
+            return redirect('/home')    
+    else:
+        cidades = usuario.lista_cidades
+        for cidade in cidades:
+            if cidade.notificavel:
+                cidade.notificavel = False
+                db.session.merge(cidade)
+                db.session.commit()
+        flash(f'Todas as notificações de {usuario.nome_usuario} foram removidas com sucesso',category="sucesso")
+        return redirect('/home')
+    
 #404
 @app.errorhandler(404)
 def page_not_found(e):
@@ -384,18 +411,22 @@ def page_not_found(e):
     return render_template("erro404.html")
 
 def verificar_existencia_cidade(nome_cidade:str):
-    cidade_existente = CidadeDoJson.query.filter_by(name=nome_cidade).first() 
-    return cidade_existente 
+    with open('city.list.min.json','r',encoding="utf8") as file_cidades:
+        cidades_dados = json.loads(file_cidades.read())
+        for cidade in cidades_dados:
+            if cidade['name'] == nome_cidade:
+                return True
+    return False
+    
 
 def coletar_objetos_climaticos(nome_cidade:str):
-    cidade = verificar_existencia_cidade(nome_cidade)
-    if cidade is not None:
+    try:
         objeto_cidade = api_clima.weather_at_place(nome_cidade.capitalize())
         objeto_previsao = api_clima.three_hours_forecast(nome_cidade.capitalize())
-        return objeto_cidade,objeto_previsao
-    else:
+    except NotFoundError:
         return None
-
+    else:
+        return (objeto_cidade,objeto_previsao)
 
 def calcular_media_notas(lista_notas:list):
     tamanho_lista = len(lista_notas)
@@ -462,3 +493,73 @@ def validar_cpf(cpf):
         return False
     except:
         return False
+
+
+def criar_mensagem_email(usuario):
+    textos = ''
+    for cidade in usuario.lista_cidades:
+        if cidade.notificavel:
+            objeto_cidade = coletar_objetos_climaticos(cidade.nome_cidade)[0]
+            clima_agora = objeto_cidade.get_weather()
+            texto = f'''
+
+            GET WEATHER - CIDADE: {cidade.nome_cidade}
+            Descrição: {cidade.descricao}
+            Temperatura: { clima_agora.get_temperature(unit='celsius')['temp']}°C
+            Descrição: { clima_agora.get_detailed_status()}
+            Umidade: { clima_agora.get_humidity() } %
+            Nuvens: { clima_agora.get_clouds() } %
+            
+            Se você não quiser mais receber emails dessa cidade por favor clique aqui:
+            {url_for('cancelar_notificacao',cpf_usuario=usuario.cpf_usuario,id=cidade.id, _external=True)}
+            '''
+            textos += texto
+            
+    textos += f'''
+    Se você não quiser mais receber e-mails de nenhuma cidade, por favor clique aqui:
+    {url_for('cancelar_notificacao', cpf_usuario=usuario.cpf_usuario,id='todos' ,_external=True)}
+    '''
+    return textos
+
+
+@app.route('/enviar_email/<cpf>',methods=['get','post'])
+def enviar_email(cpf):
+    if cpf == "todos": #mandar email para todos os usuários
+        usuarios = UsuarioModel.query.all()
+        for usuario in usuarios:
+            cidade_notificavel = CidadeModel.query.filter_by(cpf_usuario=usuario.cpf_usuario,notificavel=True).first() 
+            if cidade_notificavel is not None:
+                email_usuario = usuario.email
+                msg = Message("Get Weather Diário",
+                        recipients=[email_usuario])
+                texto = criar_mensagem_email(usuario)
+                msg.body = texto
+                try:
+                    mail.send(msg)
+                except:
+                    flash(f'Erro ao enviar e-mail para {usuario.nome_usuario}: Nenhuma cidade dele(a) é notificável.',category="erro")
+        else:
+            flash(f'E-mail enviado com sucesso',category="sucesso")
+        return redirect('/home')
+    
+    else: #mandar apenas para um usuário (botão na rota listar_cidades)
+        usuario = UsuarioModel.query.filter_by(cpf_usuario=cpf).first()
+        if usuario is not None: #para isso, o cpf precisa estar cadastrado
+            cidade_notificavel = CidadeModel.query.filter_by(cpf_usuario=cpf,notificavel=True).first() 
+            if cidade_notificavel is not None: #verifica se o usuário tem pelo menos uma notificável
+                email_usuario = usuario.email
+                msg = Message("Get Weather Diário",
+                        recipients=[email_usuario])
+                texto = criar_mensagem_email(usuario)
+                msg.body = texto
+                mail.send(msg)
+                flash(f'E-mail enviado com sucesso',category="sucesso")
+                return redirect('/lista_cidades')
+            else:
+                flash(f'Erro ao enviar e-mail para {usuario.nome_usuario}: Nenhuma cidade dele(a) é notificável.',category="erro")
+                return redirect('/lista_cidades')
+        else:
+            flash(f'CPF inválido',category="erro")
+            return redirect('/lista_cidades')
+
+    

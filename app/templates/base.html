@@ -1,18 +1,35 @@
 {% extends "bootstrap/base.html" %} 
 {%from "mostrar_erro_lista.html" import mostrar_erro_lista %} 
 {%from "mostrar_erro_field.html" import mostrar_erro_field %} 
-{%from "form_helpers.html" import render_field %} 
 {% import "bootstrap/wtf.html" as wtf %}
+
+
+{% block styles %}
+  {{super()}}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock styles %}
+
 
 {% block content %}
 <!DOCTYPE html>
 <html>
 
 <head>
-    <link rel="shortcut icon" type="image/x-icon" href="img/logo.ico">
-</head>
+    {% block title %}
+        Get Weather
+    {% endblock title %}
+    
+    {% block head %}
+        {{super()}}
+        <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    {% endblock %}
 
-<header>
+</head>
+<body>
+    {% block navbar %}
+    
+    <header>
+    
     <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
         <img src="{{ url_for('static', filename='') }}" alt="">
         <img src="{{ url_for('static', filename='img/icone.png') }}" height="40px" width="40px">
@@ -41,17 +58,19 @@
             {% endif %}
         </div>
     </nav>
-</header>
+    </header>
+    {% endblock navbar %}
 
-<main>
+<main role="main" class="flex-shrink-0">
     {% block main %} {% endblock main %}
 </main>
 
-<footer class="text-center" style="background-color: #e9ecef;padding-bottom: 10px; padding-top: 10px;">
-    <div class="container" style="font-size: 15px">
+
+<footer class="text-center  footer navbar  sticky-bottom align-itens-center " >
+    <div class="container">
         <p class="text">O Get Weather é um site desenvolvido com o intuito de disponibilizar informações relacionadas ao clima em todo o mundo. Foi desenvolvido a partir de um trabalho acadêmico dos alunos do Instituo federal Catarinense - campus Blumenau, sendo os alunos
-            Beatriz Bauer, Diogenes H. Maçaneiro, Gabriel Gahio, Pedro Schumann, Teodoro Freiberger e Vítor Augusto U. Otto.</p>
-        <p>Contato: GetWeather@gmail.com ou +55 47 99256-4732</p>
+            Beatriz Bauer, Diogenes H. Maçaneiro, Gabriel Gahio, Pedro Schumann, Teodoro Freiberger e Vítor Augusto U. Otto. Contato: notaweatherbot@gmail.com ou +55 47 99256-4732</p>
+        <p class="text text-align-center"></p>
     </div>
 </footer>
 </body>

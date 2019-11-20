@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import (PasswordField, StringField, IntegerField, BooleanField,
-     SubmitField,TextAreaField,FloatField,FileField)
+     SubmitField,TextAreaField,FloatField,FileField,SelectField)
 from wtforms.validators import InputRequired, Length, EqualTo, Email,NumberRange
 from flask_uploads import UploadSet, IMAGES
 from flask_wtf.file import FileAllowed
@@ -20,22 +20,22 @@ ERROS = {
     }
 
 class CadastroUsuarioForm(FlaskForm):
-    nome_completo = StringField("Nome completo", validators=[InputRequired(message=ERROS['requerido'])])
+    nome_completo = StringField("Nome completo:", validators=[InputRequired(message=ERROS['requerido'])])
 
-    nome_usuario = StringField("Nome de usuário", validators=[Length(min=1,max=20,message=ERROS['quant_caracter_usuario']),
+    nome_usuario = StringField("Nome de usuário:", validators=[Length(min=1,max=20,message=ERROS['quant_caracter_usuario']),
         InputRequired(message=ERROS['requerido'])])
 
-    cpf = StringField("Cpf", validators=[InputRequired(message=ERROS['requerido']),Length(min=11,max=14,message=ERROS['tamanho_cpf'])])
+    cpf = StringField("CPF:", validators=[InputRequired(message=ERROS['requerido']),Length(min=11,max=14,message=ERROS['tamanho_cpf'])])
 
-    email = StringField("Email", validators=[Email(message=ERROS['email']),Length(min=10,max=256,message=ERROS['tamanho_email']), 
+    email = StringField("Email:", validators=[Email(message=ERROS['email']),Length(min=10,max=256,message=ERROS['tamanho_email']), 
         InputRequired(message=ERROS['requerido']) ])
 
-    senha = PasswordField("Senha", validators=[InputRequired(message=ERROS['requerido']),Length(min=3,max=32,message=ERROS['tamanho_senha'])])
+    senha = PasswordField("Senha:", validators=[InputRequired(message=ERROS['requerido']),Length(min=3,max=32,message=ERROS['tamanho_senha'])])
 
-    confirmacao_senha = PasswordField("Digite a Senha novamente", validators=[InputRequired(message=ERROS['requerido']),
+    confirmacao_senha = PasswordField("Digite a Senha novamente: ", validators=[InputRequired(message=ERROS['requerido']),
         Length(min=3,max=32,message=ERROS['tamanho_senha']), EqualTo('senha',message=ERROS['senhas_iguais'])])
     
-    imagem = FileField('Foto de Perfil', validators=[FileAllowed(['jpg', 'png','jpeg'],message=ERROS['arquivo_foto']) ])
+    imagem = FileField('Foto de Perfil:', validators=[FileAllowed(['jpg', 'png','jpeg'],message=ERROS['arquivo_foto']) ])
     
     enviar = SubmitField("Enviar")
 
@@ -92,6 +92,8 @@ class AlterarSenhaForm(FlaskForm):
     editar = SubmitField("Editar Senha")
 
 class PesquisarCidadeForm(FlaskForm):
-    nome_cidade= StringField("Nome da cidade", validators=[Length(max=100,message=ERROS['tamanho_cidade'])])
+    nome_cidade= StringField("Pesquisar cidade por nome:", validators=[Length(max=100,message=ERROS['tamanho_cidade'])])
 
     pesquisar = SubmitField("Pesquisar cidade")
+    
+    

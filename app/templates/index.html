@@ -8,15 +8,25 @@
 {% block main %}
 <br><br><br><br>
 
-{% with mensagens = get_flashed_messages() %}
-    {% if  mensagens%}
-        {% for mensagem in mensagens %}
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                {{ mensagem }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
+{% with mensagens = get_flashed_messages(with_categories=true) %}
+    {% if mensagens%}
+        {% for categoria, mensagem in mensagens %}
+            {% if categoria == 'sucesso' %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ mensagem }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endif %}
+            {% if categoria == 'erro' %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ mensagem }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endif %}
         {% endfor %}
     {% endif %}
 {% endwith %}

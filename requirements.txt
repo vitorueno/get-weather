@@ -7,3 +7,4 @@ pyowm
 uuid
 tzlocal
 flask_uploads
+flask_mail

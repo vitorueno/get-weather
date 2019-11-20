@@ -33,7 +33,7 @@ class UsuarioModel(db.Model,UserMixin):
 
 class CidadeModel(db.Model):
     id = db.Column(db.String,primary_key=True)
-    nome_cidade =  db.Column(db.String, nullable=False,unique=True)
+    nome_cidade =  db.Column(db.String, nullable=False)
     usuario = db.relationship('UsuarioModel', back_populates='lista_cidades')
     cpf_usuario = db.Column(db.String(20), db.ForeignKey('usuario_model.cpf_usuario'),nullable=False)
     favorito = db.Column(db.Boolean,nullable=False)
@@ -65,7 +65,7 @@ class AvaliacaoSiteModel(db.Model):
         self.comentario = comentario
         self.caminho_foto = caminho_foto
     
-
+'''
 class CidadeDoJson(db.Model):
     name = db.Column(db.String)
     id = db.Column(db.Integer,primary_key=True)
@@ -77,3 +77,4 @@ class CidadeDoJson(db.Model):
         self.name = name
         self.country = country
         self.coord = coord
+'''
