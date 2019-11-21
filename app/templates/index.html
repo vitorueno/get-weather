@@ -1,13 +1,8 @@
 {% extends 'base.html' %} 
 
-{% block styles %}
-{{super()}}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
-{% endblock styles %}
 
 {% block main %}
-<br><br><br><br>
-
+<br><br>
 {% with mensagens = get_flashed_messages(with_categories=true) %}
     {% if mensagens%}
         {% for categoria, mensagem in mensagens %}
@@ -75,20 +70,16 @@
 
 <br><br>
 
-
-
-        <h1>Avaliação do site:</h1>
-    
-    
+        <h1 class="text-center">Avaliação do site:</h1>
         {% if media != None %}
-            <h3>Nota média: {{media}}</h3>
+            <h3 style="padding-top: 2rem;" class="text-center">Nota média: {{media}}</h3>
         {% else %}
-            <h3>Nenhuma avaliação do site foi feita. Volte mais tarde</h3>
+            <h3  style="padding-top: 2rem;" class="text-center">Nenhuma avaliação do site foi feita. Volte mais tarde</h3>
         {% endif %}
         
     <br>
    
-    <h3>Avaliações:</h3>
+    <h3 style="padding-top: 2rem; padding-bottom: 2rem;">Avaliações:</h3>
 
     {% for avaliacao in avaliacoes %} 
         <div class="row">
@@ -106,21 +97,16 @@
                             <h6 class="text-muted time">{{avaliacao.data}}</h6>
                         </div>
                     </div> 
-                    {% if avaliacao.comentario|length > 0 %}
-                        <div class="post-description"> 
-                            <p>{{avaliacao.comentario}}</p>
-                        </div>
-                    {% endif %}
+                    <div class="post-description"> 
+                        <p>{{avaliacao.comentario}}</p>
+                    </div>
                 </div>
             </div>
         </div>
         <br>
         <br>
-        
     {%endfor%}
 
     <br><br>
-
-</main>
 
 {% endblock main%}

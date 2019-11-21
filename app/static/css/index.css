@@ -1,4 +1,6 @@
 
+@import url("https://fonts.googleapis.com/css?family=Montserrat:400,500,600,700,800,900");
+
 .form-group.required::before{
     content: '*'; 
     color: red;
@@ -18,8 +20,8 @@ body {
     sans-serif;
 }
 
-h1,h2,h3,h4{
-    font-family: 'Baloo Paaji', cursive; 
+body{
+    font-family: 'Montserrat', sans-serif;
 }
 
 

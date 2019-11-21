@@ -1,0 +1,15 @@
+.fluid, .cabecalho{
+    
+    background-image: url('/static/img/lista_cidade.jpg');
+    background-repeat: no-repeat;
+}
+
+input#pesquisar.btn.btn-primary{
+    position: relative;
+    bottom: 55px;
+    left: 250px;
+}
+
+.menu.float-right{
+    margin-right: 2rem;
+}

@@ -3,10 +3,11 @@
 {% block styles %}
   {{ super() }}
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/lista_cidades.css') }}">
 {% endblock styles %}
 
 {% block main %}
-  <main>
+  <div class="fluid cabecalho">
     <br><br><br>
     {% with mensagens = get_flashed_messages(with_categories=true) %}
     {% if mensagens%}
@@ -30,43 +31,40 @@
         {% endfor %}
     {% endif %}
   {% endwith %}
-
     <div>
-      <div style="float: right;">
+      <div class="menu float-right">
       <nav class="navbar navbar-expand-sm">
         <form action="lista_cidades" method="POST">
           {{ wtf.quick_form(form) }}
         </form>
       </nav>
-      <div style="margin-left: 20px;">
+
       <div class="btn-group">
-          <a href="{{ url_for('cadastrar_cidade') }}" class="btn btn-primary" style="width:200px;">Adicionar Cidade</a>
+          <a href="{{ url_for('cadastrar_cidade') }}" class="btn btn-primary" style="width:200px;">Adicionar Cidade <i class="fas fa-plus"></i></a>
           
-          <div class="btn-group">
-            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-              Filtrar por
-            </button>
-            <div class="dropdown-menu">
-              <a class="dropdown-item" href="{{ url_for('listar_cidades') }}">Nada</a>
-              <a class="dropdown-item" href="{{ url_for('listar_cidades',favoritas=True,notificaveis=False) }}">Favorito</a>
-              <a class="dropdown-item" href="{{ url_for('listar_cidades',favoritas=False,notificaveis=True) }}">Notificavel</a>
-              <a class="dropdown-item" href="{{ url_for('listar_cidades',favoritas=True,notificaveis=True) }}">Favorito e Notificável</a>
-            </div>
+          <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+            Filtrar por
+          </button>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="{{ url_for('listar_cidades') }}">Nada</a>
+            <a class="dropdown-item" href="{{ url_for('listar_cidades',favoritas=True,notificaveis=False) }}">Favorito</a>
+            <a class="dropdown-item" href="{{ url_for('listar_cidades',favoritas=False,notificaveis=True) }}">Notificavel</a>
+            <a class="dropdown-item" href="{{ url_for('listar_cidades',favoritas=True,notificaveis=True) }}">Favorito e Notificável</a>
           </div>
-          <a class ="btn btn-primary"  href="{{ url_for('enviar_email',cpf=current_user.cpf_usuario) }}">Enviar climas por e-mail</a>
+          <a class ="btn btn-primary"  href="{{ url_for('enviar_email',cpf=current_user.cpf_usuario) }}">Enviar climas por e-mail <i class="fas fa-envelope"></i></a>
         </div>
-          </div>
+        <br>
       </div>  
       <h1 style="color: white; font-size: 80px; font-family: Arial, sans-serif; margin-left: 100px; margin-top: 20px; -webkit-text-stroke-width: 3px; -webkit-text-stroke-color: black; text-shadow: 2px 2px black;">Sua Lista de Cidades</h1>
     </div>
     <br><br><br><br>
     <hr>
-
+</div>
 <div class="container-fluid">
 <div class="col-md-12">
+<br><br>
+
 {% if cidades|length > 0 %}
-
-
 <div class="table-responsive">
     <table class="table table-hover">
         <thead class="thead-dark">
@@ -75,8 +73,8 @@
                 <th scope="col">Descrição</th>
                 <th scope="col">Favorito</th>
                 <th scope="col">Notificável</th>
-                <th scope="col">Editar</th>
                 <th scope="col">Conferir Clima</th>
+                <th scope="col">Editar</th>
                 <th scope="col">Remover</th>
             </tr>
         </thead>
@@ -101,12 +99,12 @@
                 {% else %}
                   <td scope="row">Não</td>
                 {% endif %}
-                <td scope="row">
-                  <a href="{{ url_for('editar_cidade',id=cidade.id) }}">Editar <i class="fas fa-edit"></i></a>
-                </td>
                 <td scope="row">           
                 <a href="{{ url_for('exibir_cidade',id=cidade.id) }}">Ver clima <i class="fas fa-temperature-high"></i></a>
                 </td>    
+                <td scope="row">
+                    <a href="{{ url_for('editar_cidade',id=cidade.id) }}">Editar <i class="fas fa-edit"></i></a>
+                </td>
                 <td scope="row">
                   <a href="{{ url_for('deletar_cidade',id=cidade.id) }}">Excluir <i class="fas fa-trash"></i></a>
                 </td>
@@ -121,5 +119,5 @@
 
 </div>
 </div>
-</main>
+
 {% endblock main %}

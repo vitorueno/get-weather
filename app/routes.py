@@ -402,16 +402,7 @@ def cancelar_notificacao(cpf_usuario,id):
 def page_not_found(e):
     #flash("Erro 404: A página solicitada não foi implementada. Desculpe pelo inconveniente.")
     return render_template("erro404.html")
-
-def verificar_existencia_cidade(nome_cidade:str):
-    with open('city.list.min.json','r',encoding="utf8") as file_cidades:
-        cidades_dados = json.loads(file_cidades.read())
-        for cidade in cidades_dados:
-            if cidade['name'] == nome_cidade:
-                return True
-    return False
     
-
 def coletar_objetos_climaticos(nome_cidade:str):
     try:
         objeto_cidade = api_clima.weather_at_place(nome_cidade.capitalize())
