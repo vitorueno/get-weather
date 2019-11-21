@@ -113,7 +113,8 @@ def editar_usuario():
         if imagem.data.filename != "":
             nome_arquivo = secure_filename(imagem.data.filename)
             arquivo_atual = os.path.split(current_user.caminho_foto)[1]
-            os.remove(os.path.join(app.config['UPLOAD_FOLDER'],arquivo_atual))
+            if arquivo_atual != "ovo.jpg":
+                os.remove(os.path.join(app.config['UPLOAD_FOLDER'],arquivo_atual))
             imagem.data.save(os.path.join(app.config['UPLOAD_FOLDER'],nome_arquivo))
             current_user.caminho_foto = "img/" + nome_arquivo
         
@@ -398,10 +399,17 @@ def cancelar_notificacao(cpf_usuario,id):
         return redirect('/home')
     
 #404
+@app.errorhandler(401)
 @app.errorhandler(404)
 def page_not_found(e):
-    #flash("Erro 404: A página solicitada não foi implementada. Desculpe pelo inconveniente.")
-    return render_template("erro404.html")
+    erro = str(e)[0:3]
+    if erro == '401':
+        descr_erro = '''Você precisa estar logado para acessar essa rota. Use o botão "Entrar" no menu de navegação para se conectar ao nosso serviço.
+                         Desculpe pelo incoveniente.'''
+    if erro == '404':
+        descr_erro = 'A página solicitada não existe e/ou algum erro inesperado ocorreu. Desculpe pelo inconveniente.'
+    return render_template("erro404.html",erro=erro,descr_erro=descr_erro)
+
     
 def coletar_objetos_climaticos(nome_cidade:str):
     try:

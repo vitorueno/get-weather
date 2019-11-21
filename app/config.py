@@ -18,7 +18,7 @@ class Config:
         'tamanho_cpf': 'O tamanho do cpf deve estar entre 11 e 14 caracteres. Por favor tente novamente',
         'tamanho_cidade': 'O nome da cidade deve ter no máximo 100 caracteres. Por favor tente novamente.',
         'arquivo_foto': 'A foto de perfil do usuário deve ter o formato de PNG ou JPG. Tente outra foto',
-        'file_required': 'O arquivo é obrigatório. Por favor, coloque um.'
+        'file_required': 'O arquivo é obrigatório. Por favor, coloque um.',
     }
     
     if platform.system() == "Windows":
