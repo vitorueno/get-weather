@@ -1,5 +1,11 @@
 {% extends 'base.html' %} 
 
+
+{% block title %}
+    Get weather - Lista de cidades
+{% endblock title %}
+
+
 {% block styles %}
   {{ super() }}
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
@@ -46,12 +52,12 @@
             Filtrar por
           </button>
           <div class="dropdown-menu">
-            <a class="dropdown-item" href="{{ url_for('listar_cidades') }}">Nada</a>
+            <a class="dropdown-item" href="{{ url_for('listar_cidades') }}">Todas</a>
             <a class="dropdown-item" href="{{ url_for('listar_cidades',favoritas=True,notificaveis=False) }}">Favorito</a>
             <a class="dropdown-item" href="{{ url_for('listar_cidades',favoritas=False,notificaveis=True) }}">Notificavel</a>
             <a class="dropdown-item" href="{{ url_for('listar_cidades',favoritas=True,notificaveis=True) }}">Favorito e Notificável</a>
           </div>
-          <a class ="btn btn-primary"  href="{{ url_for('enviar_email',cpf=current_user.cpf_usuario) }}">Enviar climas por e-mail <i class="fas fa-envelope"></i></a>
+          <a class ="btn btn-primary"  href="{{ url_for('enviar_email_clima',cpf=current_user.cpf_usuario) }}">Enviar climas por e-mail <i class="fas fa-envelope"></i></a>
         </div>
         <br>
       </div>  
@@ -113,8 +119,10 @@
         </tbody>
     </table>
   </div>
+  <br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 {% else %}
   <h3>Nenhuma está cadastrada na lista. Por favor, adicione uma quiser ver seu clima.</h3>
+  <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 {% endif %}
 
 </div>

@@ -19,6 +19,11 @@ planejamento e execução de um site CRUD (Create, Read, Update, Delete).</p>
 
 <h2>Requisistos: </h2>
 
+<p>Para rodar o site, você precisa criar um arquivo na pasta app chamado email_info.py. Nele você deve criar uma classe chamada Email 
+com os atributos globais EMAIL (string), SENHA (string), HOST (string), PORTA (int), TLS (boolean) e SSL (boolean). Os valores desses 
+atributos devem ser especificados de acordo com o email que você pretende usar. Além disso, é necessário instalar os seguintes 
+requisistos: </p>
+
 <ul>
     <li>Python versão 3.6 ou superior</li>
     <li>flask</li>
@@ -32,6 +37,7 @@ planejamento e execução de um site CRUD (Create, Read, Update, Delete).</p>
     <li>flask_mail</li>
     <li>flask_uploads</li>
 </ul>
+
 
 my twitter:
 [@UenoOtto](https://twitter.com/UenoOtto)

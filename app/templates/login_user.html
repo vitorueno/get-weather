@@ -1,4 +1,8 @@
- {% extends "base.html" %}
+{% extends "base.html" %}
+
+{% block title %}
+    Get weather - Logar 
+{% endblock title %}
 
     {% block main %}
         <br><br><br>
@@ -38,5 +42,8 @@
     
     <br><br>
         <a class="btn btn-outline-secondary" href="{{ url_for('cadastrar_usuario') }}">Não tem conta? Cadastrar</a>
+    <br><br>
+        <a class="btn btn-outline-secondary" href="{{ url_for('solicitar_recuperacao_senha') }}">Esqueci minha senha</a>
+    <br><br>
     </div>
     {% endblock main %}

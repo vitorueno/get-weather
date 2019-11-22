@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Get weather - Recuperar senha
+{% endblock title %}
+
+{% block main %}
+    <div class="container">
+        <br><br><br>
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% if mensagens%}
+            {% for categoria, mensagem in mensagens %}
+                {% if categoria == 'sucesso' %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ mensagem }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endif %}
+                {% if categoria == 'erro' %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ mensagem }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <h1>Recuperação de senha</h1>
+        <form action="/esqueci_minha_senha" method="POST">
+            {{ mostrar_erro_field(form.cpf_usuario) }}
+            {{ mostrar_erro_lista(erros) }}
+            {{ wtf.quick_form(form) }}
+        </form>
+    </div> 
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{% endblock main %}

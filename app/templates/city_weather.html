@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block title %}
+    Get weather - Clima de {{cidade.nome_cidade}}
+{% endblock title %}
+
 
 {% block styles %}
     {{ super() }}
@@ -13,8 +17,8 @@
             <div class="col">
                 <h1 class="text-center">Cidade: {{ cidade.nome_cidade }}</h1>
                 {% if cidade.descricao|length >0 %}
-                    <h4>Descrição:</h4>
-                    <p>{{ cidade.descricao }}</p>
+                    <h4 class="text-center">Descrição:</h4>
+                    <p class="text-center">{{ cidade.descricao }}</p>
                 {% endif %}
                 {% if cidade.notificavel %}
                     <h4 class="text-center">Notificável: Sim</h4>

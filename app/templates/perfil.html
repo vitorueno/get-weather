@@ -1,6 +1,8 @@
 {% extends 'base.html' %} 
 
-
+{% block title %}
+    Get weather - Perfil de {{current_user.nome_usuario}}
+{% endblock title %}
 
 
 {% block scripts %}
@@ -51,7 +53,11 @@
           <br><br>
           <a href="{{ url_for('avaliar_site') }}" class="btn btn-primary">Avaliar site</a>
           <br><br>
-
+          {% if not current_user.email_confirmado %}
+            <br><br>
+            <a href="{{ url_for('enviar_email_confirmacao',email=email) }}" class="btn btn-primary">Confirmar E-mail</a>
+            <br><br>
+          {% endif %}
           
           <a class="btn btn-danger" href="{{ url_for('excluir_conta') }}">Excluir Conta</a>
         </div>
@@ -60,7 +66,7 @@
   </div>
 
   
-  <br><br><br><br>
+  <br><br><br><br><br><br>
   </main>
 
 {% endblock main %}

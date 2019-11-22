@@ -10,6 +10,7 @@ class UsuarioModel(db.Model,UserMixin):
     nome_usuario = db.Column(db.String(20), nullable=False, unique= True)
     caminho_foto = db.Column(db.String, nullable=True)
     email = db.Column(db.String(256),nullable=False, unique=True)
+    email_confirmado = db.Column(db.Boolean)
     senha_hash = db.Column(db.String(256))
     lista_cidades = db.relationship('CidadeModel', back_populates='usuario') 
 

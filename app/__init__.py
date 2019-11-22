@@ -5,6 +5,7 @@ from flask_login import LoginManager
 from pyowm import OWM
 from flask_bootstrap import Bootstrap
 from flask_mail import Mail
+from itsdangerous import URLSafeSerializer
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -14,6 +15,7 @@ login_manager = LoginManager(app)
 login_manager.init_app(app)
 api_clima = OWM(Config.CHAVE_API_CLIMA,language='pt')
 mail = Mail(app)
+serializer = URLSafeSerializer(Config.SECRET_KEY)
 
 from app import routes
 from app import models

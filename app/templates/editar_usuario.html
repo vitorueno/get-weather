@@ -1,4 +1,9 @@
 {% extends 'base.html' %}
+
+{% block title %}
+    Get weather - Editar usuário
+{% endblock title %}
+
     {% block main %}
     <br><br><br>
     <div class="container">
@@ -11,5 +16,7 @@
             {{ mostrar_erro_field(form.imagem) }}
             {{ wtf.quick_form(form) }}
         </form>
-        {% endblock main %}
+        <br><br><br><br><br><br><br><br>
     </div>
+        {% endblock main %}
+   

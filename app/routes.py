@@ -6,17 +6,16 @@ import pytz
 import datetime
 import json
 from pyowm.exceptions.api_response_error import NotFoundError
-from app import app, db,login_manager,api_clima, mail
+from app import app, db,login_manager,api_clima, mail, serializer
 from flask import render_template, redirect,request, flash,url_for
 from flask_login import current_user, login_user, login_required, logout_user
 from flask_mail import Message
 from werkzeug import secure_filename
+from itsdangerous import SignatureExpired
 from app.models import UsuarioModel, CidadeModel, AvaliacaoSiteModel
 from app.forms import (CadastroUsuarioForm,LoginUsuarioForm,CadastroCidadeForm,
     EdicaoCidadeForm, AvaliacaoSiteForm,EdicaoUsuarioForm,AlterarSenhaForm, 
-    PesquisarCidadeForm)
-
-
+    PesquisarCidadeForm, RecuperarSenhaForm)
 
 
 #página inicial + tela  de login + cadastro de usuário
@@ -28,7 +27,7 @@ def carregar_index():
     #quando os minutos forem multiplos de 5, assim que o usuário entrar na rota de home.
     horario = datetime.datetime.now().time()
     if (horario.hour == 11 or horario.hour == 10) and (horario.minute % 5 == 0):
-        enviar_email('todos')
+        enviar_email_clima('todos')
         
     #avaliação do site
     avaliacoes = AvaliacaoSiteModel.query.all()
@@ -76,8 +75,9 @@ def cadastrar_usuario():
                         
                         db.session.add(novo_usuario)
                         db.session.commit()
-                        flash(f'Conta cadastrada com sucesso',category="sucesso")
-                        return redirect('/logar_usuario')
+                        flash(f'Conta criada com sucesso',category="sucesso")
+                        return redirect('logar_usuario')
+                    
                     else:
                         #email ja foi usado, mostrará um erro
                         erros.append('Email já cadastrado. Por favor tente outro')
@@ -174,7 +174,10 @@ def logar_usuario():
             if verificacao_senha:
                 login_user(usuario)
                 flash(f'Você foi logado com sucesso {current_user.nome_completo}',category="sucesso")
-                return redirect('/home')
+                if not current_user.email_confirmado:
+                    return redirect(url_for('enviar_email_confirmacao',email=current_user.email))
+                else:
+                    return redirect('/home')
             else:
                 erros.append('Usuário e/ou senha inválido. Por favor, digite outro.')
         else:
@@ -375,7 +378,7 @@ def excluir_conta():
 @app.route('/perfil',methods=['get','post'])
 @login_required
 def carregar_perfil():
-    return render_template('perfil.html',foto=current_user.caminho_foto)
+    return render_template('perfil.html',foto=current_user.caminho_foto,email=current_user.email)
 
 @app.route('/cancelar_notificacao/<cpf_usuario>/<id>',methods=['get','post'])
 def cancelar_notificacao(cpf_usuario,id):
@@ -397,18 +400,132 @@ def cancelar_notificacao(cpf_usuario,id):
                 db.session.commit()
         flash(f'Todas as notificações de {usuario.nome_usuario} foram removidas com sucesso',category="sucesso")
         return redirect('/home')
+
+@app.route('/esqueci_minha_senha', methods=['get','post'])
+def solicitar_recuperacao_senha():
+    form = RecuperarSenhaForm()
+    erros = []
+    if form.validate_on_submit():
+        cpf_padronizado = padronizar_cpf(form.cpf_usuario.data)
+        usuario = UsuarioModel.query.filter_by(cpf_usuario=cpf_padronizado).first()
+        if usuario is not None:
+            return redirect(url_for('recuperar_senha',cpf=cpf_padronizado))
+        else:
+            erros.append('CPF inválido. Por favor, tente outro')
+    return render_template('recuperar_senha.html',form=form,erros=erros)
+
+@app.route('/recuperar_senha/<cpf>',methods=['get','post'])
+def recuperar_senha(cpf):
+    usuario = UsuarioModel.query.filter_by(cpf_usuario=cpf).first()
+    if usuario is not None:
+        nova_senha = str(uuid4())[:16]
+        usuario.set_senha_hash(nova_senha)
+        db.session.merge(usuario)
+        db.session.commit()
+        mensagem = Message('Get Weather - Recuperar senha',recipients=[usuario.email])
+        mensagem.body = f'''
+        Sua nova senha temporária é: {nova_senha}
+        Nós recomendamos que você faça login e troque a senha temporária para
+        uma senha permanente 
+        '''
+        mail.send(mensagem)
+        flash(f'E-mail de recuperação de senha foi enviado',category="sucesso")
+        return redirect('/logar_usuario')
+    else:
+        flash(f'Erro ao enviar e-mail de recuperação: CPF informado inválido.',category="error")
+        return redirect('/esqueci_minha_senha')
+
+@app.route('/confirmar_email/<cpf>/<token>',methods=['get','post'])
+def confirmar_email(cpf,token):
+    try:
+        email = serializer.loads(token,salt='confirm_email')
+    except SignatureExpired:
+        return redirect(url_for('tratar_erro',e="expirado"))
+    else:
+        usuario = UsuarioModel.query.filter_by(cpf_usuario=cpf).first()
+        usuario.email_confirmado = True
+        db.session.merge(usuario)
+        db.session.commit()
+        flash(f'E-mail confirmado com sucesso. Você já pode usar nossos serviços',category="sucesso")
+        return redirect('/home')
+
+@app.route('/enviar_email_confirmacao/<email>',methods=['get','post'])
+def enviar_email_confirmacao(email):
+    usuario = UsuarioModel.query.filter_by(email=email).first()
+    if usuario is not None:
+        token = serializer.dumps(email, salt="confirm_email")
+        mensagem = Message('Get Weather - Confirmar E-mail',recipients=[email])
+        link = url_for('confirmar_email',cpf=usuario.cpf_usuario,token=token,_external=True)
+        mensagem.body = f'Clique aqui para confirmar seu e-mail: {link}'
+        mail.send(mensagem)
+        flash(f'Confirme seu e-mail no link que enviamos para o e-mail cadastrado para usar nosso serviço de atualização diária',category="sucesso")
+    else:
+        flash(f'E-mail inválido para enviar a confirmação de E-mail',category="sucesso")
+    return redirect('/home')
+
+
+@app.route('/enviar_email_clima/<cpf>',methods=['get','post'])
+def enviar_email_clima(cpf):
+    if cpf == "todos": #mandar email para todos os usuários
+        usuarios = UsuarioModel.query.all()
+        for usuario in usuarios:
+            if usuario.email_confirmado:
+                cidade_notificavel = CidadeModel.query.filter_by(cpf_usuario=usuario.cpf_usuario,notificavel=True).first() 
+                if cidade_notificavel is not None:
+                    email_usuario = usuario.email
+                    msg = Message("Get Weather - Atualização de clima",
+                            recipients=[email_usuario])
+                    texto = criar_mensagem_email_clima(usuario)
+                    msg.body = texto
+                    try:
+                        mail.send(msg)
+                    except:
+                        flash(f'Erro ao enviar e-mail para {usuario.nome_usuario}: Nenhuma cidade dele(a) é notificável.',category="erro")
+            else:
+                flash(f'Erro ao enviar e-mail para {usuario.nome_usuario}: e-mail não confirmado.',category="erro")
+        else:
+            flash(f'E-mails enviados com sucesso',category="sucesso")
+        return redirect('/home')
     
-#404
+    else: #mandar apenas para um usuário (botão na rota listar_cidades)
+        usuario = UsuarioModel.query.filter_by(cpf_usuario=cpf).first()
+        if usuario is not None: #para isso, o cpf precisa estar cadastrado
+            if usuario.email_confirmado:
+                cidade_notificavel = CidadeModel.query.filter_by(cpf_usuario=cpf,notificavel=True).first() 
+                if cidade_notificavel is not None: #verifica se o usuário tem pelo menos uma notificável
+                    email_usuario = usuario.email
+                    msg = Message("Get Weather Diário",
+                            recipients=[email_usuario])
+                    texto = criar_mensagem_email_clima(usuario)
+                    msg.body = texto
+                    mail.send(msg)
+                    flash(f'E-mail enviado com sucesso',category="sucesso")
+                else:
+                    flash(f'Erro ao enviar e-mail para {usuario.nome_usuario}: Nenhuma cidade dele(a) é notificável.',category="erro")
+            else:
+                flash(f'O e-mail {usuario.email} não foi confirmado. Por favor, confirme seu e-mail acessando seu perfil',category="erro")
+        else:
+            flash(f'CPF inválido',category="erro")
+        return redirect('/lista_cidades')
+
+#Erros
+@app.route('/erro/<e>', methods=['get','post'])
 @app.errorhandler(401)
 @app.errorhandler(404)
-def page_not_found(e):
-    erro = str(e)[0:3]
-    if erro == '401':
-        descr_erro = '''Você precisa estar logado para acessar essa rota. Use o botão "Entrar" no menu de navegação para se conectar ao nosso serviço.
-                         Desculpe pelo incoveniente.'''
-    if erro == '404':
+def tratar_erro(e):
+    erro = str(e)
+    enviar_novo_email = False
+    if erro[0:3] == '401':
+        erro = erro[0:3]
+        descr_erro = '''Você precisa estar logado para acessar essa rota. Use o botão "Entrar" no menu de navegação 
+            para se conectar ao nosso serviço.Desculpe pelo incoveniente.'''
+    if erro[0:3] == '404':
+        erro = erro[0:3]
         descr_erro = 'A página solicitada não existe e/ou algum erro inesperado ocorreu. Desculpe pelo inconveniente.'
-    return render_template("erro404.html",erro=erro,descr_erro=descr_erro)
+    if erro == 'expirado':
+        descr_erro = 'O link de confirmação de e-mail já expirou'
+        enviar_novo_email=True
+    return render_template("erro.html",erro=erro,descr_erro=descr_erro,enviar_email=enviar_novo_email)
 
     
 def coletar_objetos_climaticos(nome_cidade:str):
@@ -487,7 +604,7 @@ def validar_cpf(cpf):
         return False
 
 
-def criar_mensagem_email(usuario):
+def criar_mensagem_email_clima(usuario):
     textos = ''
     for cidade in usuario.lista_cidades:
         if cidade.notificavel:
@@ -513,45 +630,5 @@ def criar_mensagem_email(usuario):
     '''
     return textos
 
-
-@app.route('/enviar_email/<cpf>',methods=['get','post'])
-def enviar_email(cpf):
-    if cpf == "todos": #mandar email para todos os usuários
-        usuarios = UsuarioModel.query.all()
-        for usuario in usuarios:
-            cidade_notificavel = CidadeModel.query.filter_by(cpf_usuario=usuario.cpf_usuario,notificavel=True).first() 
-            if cidade_notificavel is not None:
-                email_usuario = usuario.email
-                msg = Message("Get Weather Diário",
-                        recipients=[email_usuario])
-                texto = criar_mensagem_email(usuario)
-                msg.body = texto
-                try:
-                    mail.send(msg)
-                except:
-                    flash(f'Erro ao enviar e-mail para {usuario.nome_usuario}: Nenhuma cidade dele(a) é notificável.',category="erro")
-        else:
-            flash(f'E-mail enviado com sucesso',category="sucesso")
-        return redirect('/home')
-    
-    else: #mandar apenas para um usuário (botão na rota listar_cidades)
-        usuario = UsuarioModel.query.filter_by(cpf_usuario=cpf).first()
-        if usuario is not None: #para isso, o cpf precisa estar cadastrado
-            cidade_notificavel = CidadeModel.query.filter_by(cpf_usuario=cpf,notificavel=True).first() 
-            if cidade_notificavel is not None: #verifica se o usuário tem pelo menos uma notificável
-                email_usuario = usuario.email
-                msg = Message("Get Weather Diário",
-                        recipients=[email_usuario])
-                texto = criar_mensagem_email(usuario)
-                msg.body = texto
-                mail.send(msg)
-                flash(f'E-mail enviado com sucesso',category="sucesso")
-                return redirect('/lista_cidades')
-            else:
-                flash(f'Erro ao enviar e-mail para {usuario.nome_usuario}: Nenhuma cidade dele(a) é notificável.',category="erro")
-                return redirect('/lista_cidades')
-        else:
-            flash(f'CPF inválido',category="erro")
-            return redirect('/lista_cidades')
 
     

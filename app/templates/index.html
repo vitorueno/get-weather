@@ -1,5 +1,8 @@
 {% extends 'base.html' %} 
 
+{% block title %}
+    Get weather - Home
+{% endblock title %}
 
 {% block main %}
 <br><br>
@@ -40,22 +43,22 @@
 
         <img src="{{ url_for('static', filename='img/paris.jpg') }}" alt="paris" width="1100" height="500">
         <div class="carousel-caption">
-          <h3>Los Angeles</h3>
-          <p>We had such a great time in LA!</p>
+          <h3>Mais de 200.000 cidades possíveis</h3>
+          <p>Entre agora e aproveite</p>
         </div>   
       </div>
       <div class="carousel-item">
         <img src="{{ url_for('static', filename='img/imgem_nevasca.jpg') }}" alt="inverno" width="1100" height="500">
         <div class="carousel-caption">
-          <h3>Chicago</h3>
-          <p>Thank you, Chicago!</p>
+          <h3>Esteja sempre preparado para o clima que for</h3>
+          <p>Nosso site o informará do clima atual e previsão do tempo para os próximos 5 dias</p>
         </div>   
       </div>
       <div class="carousel-item">
         <img src="{{ url_for('static', filename='img/montanha.jpg') }}" alt="montanha" width="1100" height="500">
         <div class="carousel-caption">
-          <h3>New York</h3>
-          <p>We love the Big Apple!</p>
+          <h3>Onde você estiver</h3>
+          <p>Nosso site se preocupa com os usuários. Entre e comprove.</p>
         </div>   
       </div>
     </div>
@@ -78,8 +81,11 @@
         {% endif %}
         
     <br>
-   
-    <h3 style="padding-top: 2rem; padding-bottom: 2rem;">Avaliações:</h3>
+
+    {% if avaliacoes %}
+      <h3 style="padding-top: 2rem; padding-bottom: 2rem;">Avaliações:</h3>
+    {% endif %}
+
 
     {% for avaliacao in avaliacoes %} 
         <div class="row">
@@ -107,6 +113,6 @@
         <br>
     {%endfor%}
 
-    <br><br>
+    <br><br><br><br><br><br>
 
 {% endblock main%}
