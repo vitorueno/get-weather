@@ -117,7 +117,7 @@ def editar_usuario():
                 os.remove(os.path.join(app.config['UPLOAD_FOLDER'],arquivo_atual))
             imagem.data.save(os.path.join(app.config['UPLOAD_FOLDER'],nome_arquivo))
             current_user.caminho_foto = "img/" + nome_arquivo
-        
+            
         if  usuario.data != current_user.nome_usuario:
             usuario_existente = UsuarioModel.query.filter_by(nome_usuario=usuario.data).first()
         else:
@@ -133,6 +133,10 @@ def editar_usuario():
                 current_user.nome_completo = nome.data
                 current_user.usuario = usuario.data
                 current_user.email = email.data
+                avalicao_do_usuario = AvaliacaoSiteModel.query.filter_by(cpf_usuario=current_user.cpf_usuario).first()
+                if avalicao_do_usuario is not None and imagem.data.filename != "":
+                    avalicao_do_usuario.caminho_foto = "img/" + nome_arquivo
+                    db.session.merge(avalicao_do_usuario)
                 db.session.merge(current_user)
                 db.session.commit()
                 flash(f'Alterações na conta realizadas com sucesso',category="sucesso")
