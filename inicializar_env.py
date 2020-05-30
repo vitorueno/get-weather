@@ -1,4 +1,4 @@
-import os 
+import os
 import platform
 
 
@@ -8,12 +8,14 @@ def criar_env():
     elif platform.system() == "Linux":
         os.system('python3 -m venv env')
 
+
 def ativar_env():
     if platform.system() == "Windows":
         os.system('call env/Scripts/activate')
-            
+
     if platform.system() == "Linux":
         os.system('source env/bin/activate')
+
 
 def baixar_requirements():
     if platform.system() == "Windows" or platform.system() == "Linux":
@@ -21,6 +23,6 @@ def baixar_requirements():
 
 
 if __name__ == "__main__":
-    #criar_env()
-    #ativar_env()
+    # criar_env()
+    # ativar_env()
     baixar_requirements()
