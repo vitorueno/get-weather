@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import (PasswordField, StringField, IntegerField, BooleanField,
      SubmitField,TextAreaField,FloatField,FileField,SelectField)
 from wtforms.validators import InputRequired, Length, EqualTo, Email,NumberRange
+# from email_validator import validate_email 
 from flask_uploads import UploadSet, IMAGES
 from flask_wtf.file import FileAllowed
 from app import Config

@@ -10,7 +10,7 @@ from app import app, db,login_manager,api_clima, mail, serializer
 from flask import render_template, redirect,request, flash,url_for
 from flask_login import current_user, login_user, login_required, logout_user
 from flask_mail import Message
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
 from itsdangerous import SignatureExpired
 from app.models import UsuarioModel, CidadeModel, AvaliacaoSiteModel
 from app.forms import (CadastroUsuarioForm,LoginUsuarioForm,CadastroCidadeForm,
